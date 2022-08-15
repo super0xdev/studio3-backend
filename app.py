@@ -1,9 +1,11 @@
-from flask import Flask, jsonify, make_response, request, redirect
-from solana.keypair import Keypair
 from solana_utils.verify_signature import verify_address_ownership
+from flask import Flask, jsonify, make_response, request
+from constants.response_codes import ResponseCodes
 import traceback
+import requests
 import logging
 import tables
+import json
 import time
 logging.basicConfig(level=logging.INFO)
 
@@ -18,20 +20,29 @@ def login():
         signature = request.json['signature'].encode()
         verify_address_ownership(address, timestamp, signature)
         logging.info(f"SIGNATURE IS VALID")
-        # # TODO check if exists
-        # users = tables.Users.select(address=address)
-        # if len(users) == 0:
-        #     # TODO if not exists, insert
-        #     result = tables.Users.insert(address=address,
-        #                                  creation_timestamp=int(time.time()),
-        #                                  updated_timestamp=int(time.time()))
-        # else:
-        #     # TODO if exists, return profile
-        #     pass
+        # check if exists
+        users = tables.Users.select(address=address)
+        if len(users) == 0:
+            _result = tables.Users.insert(address=address,
+                                          creation_timestamp=int(time.time()),
+                                          updated_timestamp=int(time.time()))
+            response_code = ResponseCodes.NEW_REGISTRATION.value
+        else:
+            response_code = ResponseCodes.LOGIN_SUCCESS.value
     except Exception as e:
         logging.error(traceback.format_exc())
-        # TODO return error code
-    return jsonify(message='Hello from root!')
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+    response = {
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": "*"
+        },
+        "body": json.dumps({"success": True, 'code': response_code})
+    }
+    return response
 
 
 @app.errorhandler(404)
