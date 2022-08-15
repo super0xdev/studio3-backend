@@ -4,6 +4,12 @@ service: DsAPI
 
 frameworkVersion: '3'
 
+package:
+  exclude:
+    - ./venv/**
+    - ./__pycache__/**
+    - ./node_modules/**
+
 custom:
   wsgi:
     app: app.app
