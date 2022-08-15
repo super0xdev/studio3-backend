@@ -2,7 +2,6 @@ from solana_utils.verify_signature import verify_address_ownership
 from flask import Flask, jsonify, make_response, request
 from constants.response_codes import ResponseCodes
 import traceback
-import requests
 import logging
 import tables
 import json
@@ -29,18 +28,20 @@ def login():
             response_code = ResponseCodes.NEW_REGISTRATION.value
         else:
             response_code = ResponseCodes.LOGIN_SUCCESS.value
+        success = True
     except Exception as e:
         logging.error(traceback.format_exc())
         if hasattr(e, "code"):
             response_code = e.code
         else:
             response_code = str(e)
+        success = False
     response = {
         "statusCode": 200,
         "headers": {
             "Access-Control-Allow-Origin": "*"
         },
-        "body": json.dumps({"success": True, 'code': response_code})
+        "body": json.dumps({"success": success, 'code': response_code})
     }
     return response
 
