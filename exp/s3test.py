@@ -5,6 +5,7 @@ import uuid
 load_dotenv()
 
 first = False
+public = False
 
 # init
 aws_access_key_id = os.environ.get("s3_aws_access_key_id")
@@ -29,17 +30,18 @@ else:
 def rand_prefix():
     return str(uuid.uuid4().hex[:6])
 
-fpath = "/home/myware/PycharmProjects/DstudioApi/data/3c032fmy_avatar_0.png"
-file_key = "3c032fmy_avatar_0.png"
+fpath = "/home/myware/PycharmProjects/DstudioApi/tmp_upload/3c032fmy_avatar_0.png"
+file_key_private = "3c032fmy_avatar_0.png"
+file_key_public = "3c032fmy_avatar_1.png"
 
-upload_response = bucket.upload_file(Filename=fpath, Key=file_key)
+if not public:
+    upload_response = bucket.upload_file(Filename=fpath, Key=file_key_private)
+else:
+    upload_response = bucket.upload_file(Filename=fpath, Key=file_key_public, ExtraArgs={'ACL': "public-read"})
 
 
 
 # download file
-download_response = s3_resource.Object(bucket_name, file_key).download_file(
-    f'/home/myware/PycharmProjects/DstudioApi/tmp_download/{file_key}')
+download_response = s3_resource.Object(bucket_name, file_key_private).download_file(
+    f'/home/myware/PycharmProjects/DstudioApi/tmp_download/{file_key_private}')
 
-
-# s3_resource.Object(first_bucket_name, first_file_name).download_file(
-#     f'/home/myware/PycharmProjects/DstudioApi/tmp_download/{file_key}')
