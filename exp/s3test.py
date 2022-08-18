@@ -5,7 +5,7 @@ import uuid
 load_dotenv()
 
 first = False
-public = False
+public = True
 
 # init
 aws_access_key_id = os.environ.get("s3_aws_access_key_id")
@@ -30,9 +30,9 @@ else:
 def rand_prefix():
     return str(uuid.uuid4().hex[:6])
 
-fpath = "/home/myware/PycharmProjects/DstudioApi/tmp_upload/3c032fmy_avatar_0.png"
+fpath = "/home/myware/PycharmProjects/DstudioApi/tmp_upload/mHYQPS37_400x400.jpg"
 file_key_private = "3c032fmy_avatar_0.png"
-file_key_public = "3c032fmy_avatar_1.png"
+file_key_public = "mHYQPS37_400x400.jpg"
 
 if not public:
     upload_response = bucket.upload_file(Filename=fpath, Key=file_key_private)
