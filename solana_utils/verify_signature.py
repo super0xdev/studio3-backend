@@ -1,6 +1,6 @@
 from solana.publickey import PublicKey
 from nacl.signing import VerifyKey
-import constants.exceptions as errors
+import response_utils.exceptions as errors
 import nacl.exceptions
 import logging
 import base58

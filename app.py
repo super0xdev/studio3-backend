@@ -1,6 +1,7 @@
 from solana_utils.verify_signature import verify_address_ownership
 from flask import Flask, jsonify, make_response, request
-from constants.response_codes import ResponseCodes
+from response_utils.response_codes import ResponseCodes
+from response_utils.format_reponse import format_response
 import traceback
 import logging
 import tables
@@ -18,8 +19,6 @@ def login():
         timestamp = request.json['timestamp']
         signature = request.json['signature'].encode()
         verify_address_ownership(address, timestamp, signature)
-        logging.info(f"SIGNATURE IS VALID")
-        # check if exists
         users = tables.Users.select(address=address)
         if len(users) == 0:
             _result = tables.Users.insert(address=address,
@@ -36,17 +35,30 @@ def login():
         else:
             response_code = str(e)
         success = False
-    response = {
-        "statusCode": 200,
-        "headers": {
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": json.dumps({"success": success, 'code': response_code})
-    }
-    return response
+    return format_response(success, response_code)
+
+
+@app.route("/upload_asset", methods=['POST'])
+def upload_asset():
+    logging.info("inside upload_asset")
+    try:
+        logging.info(f"got files: {request.files}")
+        image = request.files['image'].read()
+        with open('./tmp_upload/tes_tmp_0.jpg', 'wb') as f:
+            f.write(image)
+            logging.info(f"wrote tmp image")
+        metadata = json.loads(request.files['metadata'].read())
+        logging.info(f"got metadata: {metadata}")
+
+    except Exception as e:
+        logging.error(e)
+    return format_response(True, "TEST_CODE")
 
 
 @app.errorhandler(404)
 def resource_not_found(e):
     return make_response(jsonify(error='Not found!'), 404)
+
+
+
 
