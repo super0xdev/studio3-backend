@@ -42,12 +42,15 @@ def login():
 def upload_asset():
     logging.info("inside upload_asset")
     try:
-        logging.info(f"got files: {request.files}")
+        # TODO parse metadata for name
+        metadata = json.loads(request.files['metadata'].read())
         image = request.files['image'].read()
+        # TODO make tmp file name
         with open('./tmp_upload/tes_tmp_0.jpg', 'wb') as f:
             f.write(image)
             logging.info(f"wrote tmp image")
-        metadata = json.loads(request.files['metadata'].read())
+        # TODO insert into database
+        # TODO delete tmp file name
         logging.info(f"got metadata: {metadata}")
 
     except Exception as e:
