@@ -7,6 +7,7 @@ import logging
 import tables
 import json
 import time
+import uuid
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
@@ -27,7 +28,9 @@ def login():
         data = None
         if len(users) == 0:
             # crete new user
-            _result = tables.Users.insert(address=address,
+            user_uid = int(uuid.uuid4())
+            _result = tables.Users.insert(uid=user_uid,
+                                          address=address,
                                           creation_timestamp=int(time.time()),
                                           updated_timestamp=int(time.time()))
             response_code = ResponseCodes.NEW_REGISTRATION.value
@@ -35,11 +38,12 @@ def login():
             # return existing user
             response_code = ResponseCodes.LOGIN_SUCCESS.value
             user: tables.Users = users[0]
-            data = {"address": user.address, "user_uid": user.uid}
+            user_uid = user.uid
+            data = {"address": user.address, "user_uid": user_uid}
 
         # create session
         session['address'] = address
-        session['user_uid'] = 666
+        session['user_uid'] = user_uid
         return format_response(True, response_code, data)
 
     except Exception as e:
