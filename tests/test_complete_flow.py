@@ -5,7 +5,7 @@ import pickle
 import time
 import os
 
-PRODUCTION_MODE = False
+PRODUCTION_MODE = True
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'

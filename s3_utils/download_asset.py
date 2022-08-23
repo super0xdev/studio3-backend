@@ -14,7 +14,7 @@ def download_asset(file_key):
                                  region_name="us-west-1",
                                  aws_access_key_id=aws_access_key_id,
                                  aws_secret_access_key=aws_secret_access_key)
-    tmp_fpath = f'./tmp/{file_key}'
+    tmp_fpath = f'/tmp/{file_key}'
     _download_response = s3_resource.Object(bucket_name, file_key).download_file(tmp_fpath)
     logging.info(f"download with response: {_download_response}")
     return tmp_fpath
