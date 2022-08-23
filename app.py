@@ -134,7 +134,7 @@ def list_assets():
             assets = tables.Assets.select(user_uid=user_uid)
             logging.info(f"got assets: {assets}")
             asset_dicts = [x.to_dict() for x in assets]
-            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_dicts)
+            return format_response(True, ResponseCodes.LIST_SUCCESS.value, data=asset_dicts)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
     except Exception as e:
