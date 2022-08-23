@@ -39,9 +39,19 @@ print(r.status_code, r.reason, r.text)
 # list assets
 api_url = os.path.join(url_base, "list_assets")
 r = session.post(url=api_url)
+data = r.json()['data']
+file_path = data[0]['file_path']
 print(r.status_code, r.reason, r.text)
+print(f"got file path: {file_path}")
 
 
-
+# download asset and save
+data = {'file_path': file_path}
+api_url = os.path.join(url_base, "download_asset")
+r = session.post(url=api_url, json=data)
+print(r.status_code, r.reason)
+with open(f"./tmp_download/{file_path}", 'wb') as f:
+    f.write(r.content)
+    print(f"wrote asset to local file")
 
 

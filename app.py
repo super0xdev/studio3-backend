@@ -1,9 +1,10 @@
 from solana_utils.verify_signature import verify_address_ownership
-from flask import Flask, jsonify, make_response, request, session
+from flask import Flask, jsonify, make_response, request, session, send_file
 from response_utils.response_codes import ResponseCodes
 from response_utils.format_reponse import format_response
 import traceback
 from s3_utils.upload_asset import upload_asset
+from s3_utils.download_asset import download_asset
 import logging
 import os
 import tables
@@ -145,18 +146,21 @@ def list_assets():
         return format_response(False, response_code)
 
 
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-
-
 @app.route("/download_asset", methods=['POST'])
-def download_asset():
-    asset_uid = request.json['asset_uid']
-    # TODO get fpath from request
-    # TODO download via fpath
-    # TODO add image into response
-    pass
+def handle_download_asset():
+    if 'user_uid' in session:
+        file_key = request.json['file_path']
+        logging.info(f"got filekey in requeast: {file_key}")
+        tmp_fpath = download_asset(file_key)
+        logging.info(f"downloaded to tmp fpath: {tmp_fpath}")
+        return send_file(tmp_fpath)
+    else:
+        return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 
 
 @app.errorhandler(404)
