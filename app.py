@@ -97,7 +97,7 @@ def handle_upload_asset():
             logging.info(f"got file type: {file_type}")
 
             tmp_fname = f"tmp_{int(time.time())}_{file_name}"
-            tmp_fpath = os.path.join('./tmp_upload', tmp_fname)
+            tmp_fpath = os.path.join('./tmp', tmp_fname)
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
                 logging.info(f"wrote tmp image: {tmp_fpath}")

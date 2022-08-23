@@ -8,3 +8,4 @@ __pycache__/
 tmp_download/
 tmp_upload/
 tmp_creds/
+tmp/
