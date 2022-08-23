@@ -1,12 +1,8 @@
-import json
+from flask import make_response, jsonify
 
 
-def format_response(success, response_code):
-    response = {
-        "statusCode": 200,
-        "headers": {
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": json.dumps({"success": success, 'code': response_code})
-    }
+def format_response(success, response_code, data=None):
+    message = {"success": success, 'code': response_code, "data": data}
+    response = make_response(jsonify(message), 200)
+    response.headers['Access-Control-Allow-Origin'] = "*"
     return response
