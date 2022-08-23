@@ -7,3 +7,4 @@ __pycache__/
 .serverless
 tmp_download/
 tmp_upload/
+tmp_creds/

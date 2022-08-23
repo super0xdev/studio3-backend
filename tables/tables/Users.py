@@ -1,8 +1,10 @@
 from solana.publickey import PublicKey
+from dataclasses_json import dataclass_json
 from dataclasses import dataclass
 from .Table import Table
 
 
+@dataclass_json
 @dataclass(unsafe_hash=True)
 class Users(Table):
 
@@ -12,6 +14,7 @@ class Users(Table):
     # column names
     uid: int
     address: PublicKey
+    username: str
     email: str
     twitter_id: int
     twitter_username: str

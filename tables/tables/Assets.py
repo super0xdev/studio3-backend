@@ -1,10 +1,12 @@
 from solana.publickey import PublicKey
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 from .Table import Table
 
 
+@dataclass_json
 @dataclass(unsafe_hash=True)
-class Users(Table):
+class Assets(Table):
 
     # table name
     _table_name = "assets"

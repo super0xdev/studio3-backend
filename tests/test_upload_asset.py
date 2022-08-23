@@ -1,8 +1,11 @@
 from solana.keypair import Keypair
 import requests
+import pickle
 import base58
+import json
 import time
 import os
+import io
 
 PRODUCTION_MODE = False
 
@@ -11,8 +14,12 @@ if PRODUCTION_MODE:
 else:
     url_base = 'http://localhost:5000/'
 
-# sign
-keypair = Keypair.generate()
+# load test keypair
+secrey_key_hex = pickle.load(open('./tmp_creds/secret_key_hex_str.p', 'rb'))
+secret_key = bytes.fromhex(secrey_key_hex)
+keypair = Keypair.from_secret_key(secret_key)
+
+# sign login message
 timestamp = int(time.time())
 pubkey = str(keypair.public_key)
 msg = bytes(str(timestamp), 'utf8')
@@ -29,9 +36,15 @@ api_url = os.path.join(url_base, "login")
 r = session.post(url=api_url, json=data)
 print(r.status_code, r.reason, r.text)
 
-# update profile
-data = {'username': "AlphaPrime8", "email": "alphaprime8@gmail.com"}
-api_url = os.path.join(url_base, "update_profile")
-r = session.post(url=api_url, json=data)
+# upload asset
+api_url = os.path.join(url_base, "upload_asset")
+metadata = {'file_type': 'jpg', 'file_name': 'myavatar666'}
+metadata_file = io.StringIO(json.dumps(metadata))
+files = {'image': open('/home/myware/PycharmProjects/DstudioApi/tmp_upload/mHYQPS37_400x400.jpg', 'rb'), 'metadata': metadata_file}
+r = session.post(url=api_url, files=files)
 print(r.status_code, r.reason, r.text)
+
+
+
+
 

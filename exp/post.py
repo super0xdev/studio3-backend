@@ -12,7 +12,6 @@ else:
 
 
 api_url = os.path.join(base_url, "upload_asset")
-
 pubkey = "Ba5ZQRTAGbgTdRLjgtvsNwipRMW2yhidWTQ9jDqJePim"
 metadata = {'address': pubkey}
 metadata_file = io.StringIO(json.dumps(metadata))

@@ -3,11 +3,12 @@ from flask import Flask, jsonify, make_response, request, session
 from response_utils.response_codes import ResponseCodes
 from response_utils.format_reponse import format_response
 import traceback
+from s3_utils.upload_asset import upload_asset
 import logging
+import os
 import tables
-import json
 import time
-import uuid
+import random
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
@@ -22,13 +23,15 @@ def login():
         timestamp = request.json['timestamp']
         signature = request.json['signature'].encode()
         verify_address_ownership(address, timestamp, signature)
+        logging.info(f"verified ownership of address: {address}")
 
         # lookup user
         users = tables.Users.select(address=address)
         data = None
         if len(users) == 0:
             # crete new user
-            user_uid = int(uuid.uuid4())
+            user_uid = random.randint(int(2**60), int(2**64)-1)
+            logging.info(f"generated new uid: {user_uid}")
             _result = tables.Users.insert(uid=user_uid,
                                           address=address,
                                           creation_timestamp=int(time.time()),
@@ -39,7 +42,7 @@ def login():
             response_code = ResponseCodes.LOGIN_SUCCESS.value
             user: tables.Users = users[0]
             user_uid = user.uid
-            data = {"address": user.address, "user_uid": user_uid}
+            data = {"address": str(user.address), "user_uid": user_uid, 'username': user.username, 'email': user.email}
 
         # create session
         session['address'] = address
@@ -58,45 +61,101 @@ def login():
 @app.route("/update_profile", methods=['POST'])
 def update_profile():
     if 'user_uid' in session:
-        logging.info(f"got session with user_uid: {session['user_uid']}")
-        return format_response(True, "AUTHENTICATED_WITH_SESSION_COOKIE_SUCCESS")
+        user_uid = session['user_uid']
+        # extract update values
+        values = {}
+        username = request.json['username']
+        email = request.json['email']
+        if username:
+            values['username'] = username
+        if email:
+            values['email'] = email
+        # update profile
+        _result = tables.Users.update(values, uid=user_uid)
+        return format_response(True, ResponseCodes.USER_PROFILE_UPDATE_SUCCESS.value, values)
     else:
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
 
 
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-
-
 @app.route("/upload_asset", methods=['POST'])
-def upload_asset():
+def handle_upload_asset():
     logging.info("inside upload_asset")
     try:
-        # TODO parse metadata for name
-        metadata = json.loads(request.files['metadata'].read())
-        image = request.files['image'].read()
-        # TODO make tmp file name
-        with open('./tmp_upload/tes_tmp_0.jpg', 'wb') as f:
-            f.write(image)
-            logging.info(f"wrote tmp image")
-        # TODO insert into database
-        # TODO delete tmp file name
-        logging.info(f"got metadata: {metadata}")
+        if 'user_uid' in session:
+            user_uid = session['user_uid']
+
+            image_file = request.files['image']
+            file_name = image_file.filename
+            file_type = file_name.split(".")[1]
+            image_bytes = request.files['image'].read()
+            image_size_bytes = len(image_bytes)
+
+            logging.info(f"got files: {request.files}")
+            logging.info(f"got filename: {file_name}")
+            logging.info(f"got image size bytes: {image_size_bytes}")
+            logging.info(f"got file type: {file_type}")
+
+            tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+            tmp_fpath = os.path.join('./tmp_upload', tmp_fname)
+            with open(tmp_fpath, 'wb') as f:
+                f.write(image_bytes)
+                logging.info(f"wrote tmp image: {tmp_fpath}")
+
+            file_key = upload_asset(tmp_fpath, tmp_fname)
+            logging.info(f"uploaded to se with file key: {file_key}")
+            os.remove(tmp_fpath)
+            logging.info(f"deleted tmp file: {tmp_fpath}")
+
+            _result = tables.Assets.insert(file_path=file_key,
+                                           file_type=file_type,
+                                           file_name=file_name,
+                                           file_size_bytes=image_size_bytes,
+                                           creation_timestamp=int(time.time()),
+                                           user_uid=user_uid)
+            logging.info(f"inserted into table with result: {_result}")
+            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
     except Exception as e:
-        logging.error(e)
-    return format_response(True, "TEST_CODE")
+        logging.error(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
 
 
 @app.route("/list_assets", methods=['POST'])
 def list_assets():
-    # TODO get uid from cookie
-    pass
+    try:
+        if 'user_uid' in session:
+            user_uid = session['user_uid']
+            assets = tables.Assets.select(user_uid=user_uid)
+            logging.info(f"got assets: {assets}")
+            asset_dicts = [x.to_dict() for x in assets]
+            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_dicts)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 
 
 @app.route("/download_asset", methods=['POST'])
 def download_asset():
     asset_uid = request.json['asset_uid']
+    # TODO get fpath from request
+    # TODO download via fpath
+    # TODO add image into response
     pass
 
 
