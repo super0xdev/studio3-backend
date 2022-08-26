@@ -24,6 +24,7 @@ functions:
     events:
       - httpApi: '*'
 
+
 plugins:
   - serverless-wsgi
   - serverless-python-requirements
