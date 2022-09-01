@@ -129,6 +129,41 @@ def handle_upload_asset():
         return format_response(False, response_code)
 
 
+# TODO TEST IT
+@app.route("/update_asset", methods=['POST'])
+def handle_update_asset():
+    # TODO update transaction signature
+    try:
+        if 'user_uid' in session:
+            _user_uid = session['user_uid']
+            asset_uid = request.json['asset_uid']
+            transaction_signature = request.json['transaction_signature']
+            purchase_price = float(request.json['purchase_price'])
+            purchase_type = request.json['purchase_type']
+            confirmed = int(bool(request.json['confirmed']))
+            confirmation_timestamp = request.json['confirmation_timestamp']
+            values = {
+                "purchase_type": purchase_type,
+                "purchase_price": purchase_price,
+                "transaction_signature": transaction_signature,
+                "confirmed": confirmed,
+            }
+            if confirmation_timestamp:
+                values['confirmation_timestamp'] = int(confirmation_timestamp)
+            _result = tables.Assets.update(values, uid=asset_uid)
+            print(f"inserted into table with result: {_result}")
+            return format_response(True, ResponseCodes.ASSET_UPDATE_SUCCESS.value)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
 @app.route("/list_assets", methods=['POST'])
 def list_assets():
     try:
