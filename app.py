@@ -14,7 +14,7 @@ import random
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 # This is for cookie encryption - will move to .env for production
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -22,6 +22,11 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 @app.route("/login", methods=['POST'])
 def login():
+
+    if 'user_uid' in session:
+        user_uid = session['user_uid']
+        print(f"SUCCESS: USER ID IN SESSSION: {user_uid}")
+
     try:
         # extract arguments
         address = request.json['address']
@@ -50,6 +55,8 @@ def login():
         # create session
         session['address'] = address
         session['user_uid'] = user_uid
+        session.modified = True
+        print(f"Completed login logic...")
         return format_response(True, response_code, data)
 
     except Exception as e:
