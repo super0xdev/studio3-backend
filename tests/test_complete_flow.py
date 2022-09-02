@@ -5,7 +5,7 @@ import pickle
 import time
 import os
 
-PRODUCTION_MODE = False
+PRODUCTION_MODE = True
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -37,7 +37,7 @@ r = session.post(url=api_url, json=data)
 print(r.status_code, r.reason, r.text)
 
 # /update_profile
-data = {'username': "AlphaPrime8888888", "email": "alphaprime8888888@gmail.com"}
+data = {'username': "AlphaPrime88888888", "email": "alphaprime88888888@gmail.com"}
 api_url = os.path.join(url_base, "update_profile")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data)
@@ -82,8 +82,8 @@ confirmed = int(bool(request.json['confirmed']))
 confirmation_timestamp = request.json['confirmation_timestamp']
 """
 data = {
-    'asset_uid': 10,
-    'transaction_signature': "38MbHEHNPjhqsyiz2RudLqBzpeyQiPLbTGVbyC3LQfnAfe6FzDXVvCuvPnLefjSkAqsYXgQ52jiC2swX45hfeQPh",
+    'asset_uid': 11,
+    'transaction_signature': "5YBogpMypSw4BJgHcwYjqMxZrtsFsF6Nwa3nUrm92R2o5KPk38r5aN5fThRruAYZ7CkKmQ5BRberRzULSFTPF1FH",
     'purchase_price': 1.1,
     'purchase_type': 'IMAGE_2K_W_WATERMARK',
     'confirmed': 1,
