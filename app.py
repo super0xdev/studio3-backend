@@ -118,7 +118,6 @@ def handle_upload_asset():
         return format_response(False, response_code)
 
 
-# TODO TEST IT
 @app.route("/update_asset", methods=['POST'])
 def handle_update_asset():
     try:
@@ -129,7 +128,10 @@ def handle_update_asset():
             purchase_price = float(request.json['purchase_price'])
             purchase_type = request.json['purchase_type']
             confirmed = int(bool(request.json['confirmed']))
-            confirmation_timestamp = request.json['confirmation_timestamp']
+            try:
+                confirmation_timestamp = request.json['confirmation_timestamp']
+            except KeyError as _e:
+                pass
             values = {
                 "purchase_type": purchase_type,
                 "purchase_price": purchase_price,

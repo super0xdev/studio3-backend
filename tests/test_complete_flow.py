@@ -13,9 +13,10 @@ else:
     url_base = 'http://localhost:5000/'
 
 # load keypair
-secrey_key_hex = pickle.load(open('./tmp_creds/secret_key_hex_str.p', 'rb'))
-secret_key = bytes.fromhex(secrey_key_hex)
-keypair = Keypair.from_secret_key(secret_key)
+keypair = Keypair.generate()
+# secrey_key_hex = pickle.load(open('./tmp_creds/secret_key_hex_str.p', 'rb'))
+# secret_key = bytes.fromhex(secrey_key_hex)
+# keypair = Keypair.from_secret_key(secret_key)
 
 # sign timestamp to authenticate
 timestamp = int(time.time())
@@ -36,7 +37,7 @@ r = session.post(url=api_url, json=data)
 print(r.status_code, r.reason, r.text)
 
 # /update_profile
-data = {'username': "AlphaPrime888888", "email": "alphaprime888888@gmail.com"}
+data = {'username': "AlphaPrime8888888", "email": "alphaprime8888888@gmail.com"}
 api_url = os.path.join(url_base, "update_profile")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data)
@@ -45,7 +46,7 @@ print(r.status_code, r.reason, r.text)
 # /upload_asset
 api_url = os.path.join(url_base, "upload_asset")
 print(f"Calling: {api_url}")
-asset_fpath = "/home/myware/PycharmProjects/DstudioApi/tmp_upload/ape1.png"
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/ape1.png"
 files = {'image': open(asset_fpath, 'rb')}
 r = session.post(url=api_url, files=files)
 print(r.status_code, r.reason, r.text)
@@ -69,9 +70,29 @@ with open(local_fpath, 'wb') as f:
     f.write(r.content)
     print(f"Save image to local file: {local_fpath}")
 
-# TODO test update asset
 # /update_asset
 
+"""
+_user_uid = session['user_uid']
+asset_uid = request.json['asset_uid']
+transaction_signature = request.json['transaction_signature']
+purchase_price = float(request.json['purchase_price'])
+purchase_type = request.json['purchase_type']
+confirmed = int(bool(request.json['confirmed']))
+confirmation_timestamp = request.json['confirmation_timestamp']
+"""
+data = {
+    'asset_uid': 10,
+    'transaction_signature': "38MbHEHNPjhqsyiz2RudLqBzpeyQiPLbTGVbyC3LQfnAfe6FzDXVvCuvPnLefjSkAqsYXgQ52jiC2swX45hfeQPh",
+    'purchase_price': 1.1,
+    'purchase_type': 'IMAGE_2K_W_WATERMARK',
+    'confirmed': 1,
+    'confirmation_timestamp': int(time.time())
 
+}
+api_url = os.path.join(url_base, "update_asset")
+print(f"Calling: {api_url}")
+r = session.post(url=api_url, json=data)
+print(r.status_code, r.reason, r.text)
 
 
