@@ -1,17 +1,29 @@
-<!--
-title: 'Serverless Framework Python Flask API on AWS'
-description: 'This template demonstrates how to develop and deploy a simple Python Flask API running on AWS Lambda using the traditional Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: Python
-priority: 2
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# DStudio Account and Asset Management API
 
-# Serverless Framework Python Flask API on AWS
+## Features
+1) Web3 Authentication 
+2) SQL Server integration 
+3) S3 Filestorage Integration for arbitrary file-types
+
+## Endpoints
+
+- login
+- update_profile
+- upload_asset
+- update_asset
+- download_asset
+- list_assets
+
+## Notes
+
+- All endpoints other than login are authenticated via the `user_uid` session cookie.
+- Response and error codes can be found in the `/response_utils` directory.
+- Client code examples can be found in the `tests` folder.
+- This system is currently deployed as AWS Lambda functions using the Serverless Framework (see below for details).
+
+==========================================================================================================================
+
+## Serverless Framework Python Flask API on AWS
 
 This template demonstrates how to develop and deploy a simple Python Flask API service running on AWS Lambda using the traditional Serverless Framework.
 

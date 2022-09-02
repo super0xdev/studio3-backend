@@ -8,6 +8,7 @@ load_dotenv()
 master_username = os.environ.get("master_username")
 master_password = os.environ.get("master_password")
 
+
 def pk2bin(pubkey_str):
     sample_pubkey = PublicKey(pubkey_str)
     return bytes(sample_pubkey).hex()

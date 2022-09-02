@@ -15,6 +15,8 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 CORS(app)
+
+# This is for cookie encryption - will move to .env for production
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
@@ -22,12 +24,10 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 def login():
     try:
         # extract arguments
-        print(f"got request: {request}")
         address = request.json['address']
         timestamp = request.json['timestamp']
         signature = request.json['signature'].encode()
         verify_address_ownership(address, timestamp, signature)
-        print(f"verified ownership of address: {address}")
 
         # lookup user
         users = tables.Users.select(address=address)
@@ -35,7 +35,6 @@ def login():
         if len(users) == 0:
             # crete new user
             user_uid = random.randint(int(2**60), int(2**64)-1)
-            print(f"generated new uid: {user_uid}")
             _result = tables.Users.insert(uid=user_uid,
                                           address=address,
                                           creation_timestamp=int(time.time()),
@@ -83,7 +82,6 @@ def update_profile():
 
 @app.route("/upload_asset", methods=['POST'])
 def handle_upload_asset():
-    print("inside upload_asset")
     try:
         if 'user_uid' in session:
             user_uid = session['user_uid']
@@ -94,21 +92,13 @@ def handle_upload_asset():
             image_bytes = request.files['image'].read()
             image_size_bytes = len(image_bytes)
 
-            print(f"got files: {request.files}")
-            print(f"got filename: {file_name}")
-            print(f"got image size bytes: {image_size_bytes}")
-            print(f"got file type: {file_type}")
-
             tmp_fname = f"tmp_{int(time.time())}_{file_name}"
             tmp_fpath = os.path.join('/tmp', tmp_fname)
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
-                print(f"wrote tmp image: {tmp_fpath}")
 
             file_key = upload_asset(tmp_fpath, tmp_fname)
-            print(f"uploaded to se with file key: {file_key}")
             os.remove(tmp_fpath)
-            print(f"deleted tmp file: {tmp_fpath}")
 
             _result = tables.Assets.insert(file_path=file_key,
                                            file_type=file_type,
@@ -116,7 +106,6 @@ def handle_upload_asset():
                                            file_size_bytes=image_size_bytes,
                                            creation_timestamp=int(time.time()),
                                            user_uid=user_uid)
-            print(f"inserted into table with result: {_result}")
             return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -132,7 +121,6 @@ def handle_upload_asset():
 # TODO TEST IT
 @app.route("/update_asset", methods=['POST'])
 def handle_update_asset():
-    # TODO update transaction signature
     try:
         if 'user_uid' in session:
             _user_uid = session['user_uid']
@@ -151,7 +139,6 @@ def handle_update_asset():
             if confirmation_timestamp:
                 values['confirmation_timestamp'] = int(confirmation_timestamp)
             _result = tables.Assets.update(values, uid=asset_uid)
-            print(f"inserted into table with result: {_result}")
             return format_response(True, ResponseCodes.ASSET_UPDATE_SUCCESS.value)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -170,7 +157,6 @@ def list_assets():
         if 'user_uid' in session:
             user_uid = session['user_uid']
             assets = tables.Assets.select(user_uid=user_uid)
-            print(f"got assets: {assets}")
             asset_dicts = [x.to_dict() for x in assets]
             return format_response(True, ResponseCodes.LIST_SUCCESS.value, data=asset_dicts)
         else:
@@ -188,9 +174,7 @@ def list_assets():
 def handle_download_asset():
     if 'user_uid' in session:
         file_key = request.json['file_path']
-        print(f"got filekey in requeast: {file_key}")
         tmp_fpath = download_asset(file_key)
-        print(f"downloaded to tmp fpath: {tmp_fpath}")
         return send_file(tmp_fpath)
     else:
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)

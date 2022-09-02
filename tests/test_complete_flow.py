@@ -69,4 +69,9 @@ with open(local_fpath, 'wb') as f:
     f.write(r.content)
     print(f"Save image to local file: {local_fpath}")
 
+# TODO test update asset
+# /update_asset
+
+
+
 
