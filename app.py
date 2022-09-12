@@ -18,6 +18,8 @@ CORS(app, supports_credentials=True)
 
 # This is for cookie encryption - will move to .env for production
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = "None"
 
 
 @app.route("/login", methods=['POST'])

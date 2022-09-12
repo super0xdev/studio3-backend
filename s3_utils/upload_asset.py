@@ -21,7 +21,9 @@ def upload_asset(local_file_path, filename):
                                  aws_secret_access_key=aws_secret_access_key)
     bucket = s3_resource.Bucket(bucket_name)
     file_key = rand_prefix() + "_" + filename
-    upload_response = bucket.upload_file(Filename=local_file_path, Key=file_key)
+    # TODO make private after test
+    # upload_response = bucket.upload_file(Filename=local_file_path, Key=file_key)
+    upload_response = bucket.upload_file(Filename=local_file_path, Key=file_key, ExtraArgs={'ACL': "public-read"})
     logging.info(f"Uploaded to S3 with response: {upload_response}")
     return file_key
 
