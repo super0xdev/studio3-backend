@@ -6,6 +6,7 @@ from response_utils.format_reponse import format_response
 import traceback
 from s3_utils.upload_asset import upload_asset
 from s3_utils.download_asset import download_asset
+from conf import consts as consts
 import logging
 import os
 import tables
@@ -115,7 +116,9 @@ def handle_upload_asset():
                                            file_size_bytes=image_size_bytes,
                                            creation_timestamp=int(time.time()),
                                            user_uid=user_uid)
-            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value)
+            file_path = os.path.join(consts.S3_BASE_URL, file_key)
+            asset_data = {'file_path': file_path}
+            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
     except Exception as e:
