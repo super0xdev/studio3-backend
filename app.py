@@ -10,6 +10,7 @@ from conf import consts as consts
 import logging
 import os
 import tables
+import json
 import time
 import random
 logging.basicConfig(level=logging.INFO)
@@ -189,7 +190,14 @@ def handle_download_asset():
     if 'user_uid' in session:
         file_key = request.json['file_path']
         tmp_fpath = download_asset(file_key)
-        return send_file(tmp_fpath)
+        file_type = tmp_fpath.split(".")[-1]
+        print(f"got file: {tmp_fpath}, type: {file_type}")
+        if file_type.lower() == 'json':
+            print(f"returning json")
+            data = json.load(open(tmp_fpath))
+            return format_response(True, ResponseCodes.DOWNLOAD_JSON_SUCCESS.value, data=data)
+        else:
+            return send_file(tmp_fpath)
     else:
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
 

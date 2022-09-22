@@ -5,12 +5,13 @@ import pickle
 import time
 import os
 
-PRODUCTION_MODE = True
+
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
 else:
-    url_base = 'http://localhost:5000/'
+    url_base = 'http://127.0.0.1:5000/'
 
 # load keypair
 keypair = Keypair.generate()
@@ -46,7 +47,7 @@ print(r.status_code, r.reason, r.text)
 # /upload_asset
 api_url = os.path.join(url_base, "upload_asset")
 print(f"Calling: {api_url}")
-asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/ape1.png"
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/meta.json"
 files = {'image': open(asset_fpath, 'rb')}
 r = session.post(url=api_url, files=files)
 print(r.status_code, r.reason, r.text)
