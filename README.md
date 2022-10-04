@@ -16,7 +16,7 @@
 
 ## Notes
 
-- All endpoints other than login are authenticated via the `user_uid` session cookie.
+- All endpoints other than login are authenticated via the `user_uid` value in the JWT upon login.
 - Response and error codes can be found in the `/response_utils` directory.
 - Client code examples can be found in the `tests` folder.
 - This system is currently deployed as AWS Lambda functions using the Serverless Framework (see below for details).
