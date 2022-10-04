@@ -1,5 +1,5 @@
 from solana_utils.verify_signature import verify_address_ownership
-from flask import Flask, jsonify, make_response, request, session, send_file
+from flask import Flask, jsonify, make_response, request, send_file
 from flask_cors import CORS
 from response_utils.response_codes import ResponseCodes
 from response_utils.format_reponse import format_response
@@ -23,7 +23,6 @@ app.config['SECRET_KEY'] = '004f2af45d3a4e161a7dd2d17fdae47f' # regenerate and m
 CORS(app)
 
 
-# This is for cookie encryption - will move to .env for production
 ########################################################################################################################
 ########################################################################################################################
 # Authentication
