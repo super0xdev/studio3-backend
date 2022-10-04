@@ -24,6 +24,7 @@ timestamp = int(time.time())
 pubkey = str(keypair.public_key)
 msg = bytes(str(timestamp), 'utf8')
 signed = keypair.sign(msg)
+
 signatureb58 = base58.b58encode(bytes(signed))
 signatureb58_decoded = signatureb58.decode()
 
