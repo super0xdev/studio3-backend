@@ -5,7 +5,7 @@ import base58
 import time
 import os
 
-PRODUCTION_MODE = False
+PRODUCTION_MODE = True
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -38,7 +38,7 @@ print(f"using token: {token}")
 
 
 # /update_profile
-data = {'username': "AlphaPrimex8888898878", "email": "alphaprimex8388889888@gmail.com"}
+data = {'username': "AlphaPrimexx8888898878", "email": "alphaprimexx8388889888@gmail.com"}
 headers = {'x-access-tokens': token}
 api_url = os.path.join(url_base, "update_profile")
 print(f"Calling: {api_url}")
