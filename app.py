@@ -19,7 +19,7 @@ import random
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '004f2af45d3a4e161a7dd2d17fdae47f' # regenerate and move to .env
+app.config['SECRET_KEY'] = consts.JWT_SECRET_KEY
 CORS(app)
 
 

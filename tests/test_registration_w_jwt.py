@@ -38,7 +38,7 @@ print(f"using token: {token}")
 
 
 # /update_profile
-data = {'username': "AlphaPrime888888878", "email": "alphaprime838888888@gmail.com"}
+data = {'username': "AlphaPrimex8888898878", "email": "alphaprimex8388889888@gmail.com"}
 headers = {'x-access-tokens': token}
 api_url = os.path.join(url_base, "update_profile")
 print(f"Calling: {api_url}")

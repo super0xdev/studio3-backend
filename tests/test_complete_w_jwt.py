@@ -42,7 +42,6 @@ headers = {'x-access-tokens': token}
 print(f"using token: {token}")
 
 ########################################################################################################################
-# TODO all other
 # /upload_asset
 api_url = os.path.join(url_base, "upload_asset")
 print(f"Calling: {api_url}")
