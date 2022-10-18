@@ -28,7 +28,12 @@ body except for the /upload_asset endpoint which takes a FormData() object.
 - `/upload_asset`
   - Parameters: 
     - FormData() object with a single `image` field. 
-- `/update_asset`
+- `/overwrite_asset`
+  - Parameters:
+    - FormData() object with a single `image` field. 
+    - asset_uid: int (of existing asset as form parameter)
+    - file_key: str (of existing asset as form parameter)
+- `/update_asset_metadata`
   - Parameters: 
     - asset_uid: int
     - transaction_signature: str
