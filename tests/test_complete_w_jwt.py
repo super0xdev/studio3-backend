@@ -59,8 +59,7 @@ file_path = data[-1]['file_path']
 asset_uid = data[-1]['uid']
 print(r.status_code, r.reason, r.text)
 
-########################################################################################################################
-# TODO /overwrite_asset
+# /overwrite_asset
 print(f"overwriting {file_path} {asset_uid}")
 
 api_url = os.path.join(url_base, "overwrite_asset")
@@ -73,7 +72,6 @@ json_data = {
 }
 r = session.post(url=api_url, files=files, headers=headers, data=json_data)
 print(r.status_code, r.reason, r.text)
-########################################################################################################################
 
 # /download_asset
 data = {'file_path': file_path}
