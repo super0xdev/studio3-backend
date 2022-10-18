@@ -119,7 +119,7 @@ def handle_upload_asset(user_uid):
         if user_uid:
             image_file = request.files['image']
             file_name = image_file.filename
-            file_type = file_name.split(".")[1]
+            file_type = file_name.split(".")[-1]
             image_bytes = request.files['image'].read()
             image_size_bytes = len(image_bytes)
 
