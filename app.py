@@ -151,9 +151,59 @@ def handle_upload_asset(user_uid):
         return format_response(False, response_code)
 
 
-@app.route("/update_asset", methods=['POST'])
+@app.route("/overwrite_asset", methods=['POST'])
 @token_required
-def handle_update_asset(user_uid):
+def handle_overwrite_asset(user_uid):
+    try:
+        if user_uid:
+
+            # extract existing file params
+            asset_uid = request.form['asset_uid']
+            file_key = request.form['file_key']
+
+            # extract image data
+            image_file = request.files['image']
+            file_name = image_file.filename
+            image_bytes = request.files['image'].read()
+            image_size_bytes = len(image_bytes)
+
+            # save tmp
+            tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+            tmp_fpath = os.path.join('/tmp', tmp_fname)
+            with open(tmp_fpath, 'wb') as f:
+                f.write(image_bytes)
+
+            # upload to s3 and cleanup
+            _ = upload_asset(tmp_fpath, file_key, overwrite=True)
+            os.remove(tmp_fpath)
+
+            # update asset metadata
+            values = {
+                "file_size_bytes": image_size_bytes,
+                "update_timestamp": int(time.time()),
+            }
+            _result = tables.Assets.update(values,
+                                           uid=asset_uid,
+                                           file_path=file_key,
+                                           user_uid=user_uid)
+            assert _result == 1, "No asset was updated in database."
+            file_path = os.path.join(consts.S3_BASE_URL, file_key)
+            asset_data = {'file_path': file_path}
+            return format_response(True, ResponseCodes.OVERWRITE_SUCCESS.value, data=asset_data)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+@app.route("/update_asset_metadata", methods=['POST'])
+@token_required
+def handle_update_asset_metadata(user_uid):
     try:
         if user_uid:
             asset_uid = request.json['asset_uid']

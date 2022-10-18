@@ -7,7 +7,7 @@ import time
 import os
 import io
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -41,22 +41,39 @@ token = data['data']['token']
 headers = {'x-access-tokens': token}
 print(f"using token: {token}")
 
-########################################################################################################################
 # /upload_asset
 api_url = os.path.join(url_base, "upload_asset")
 print(f"Calling: {api_url}")
-asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/meta.json"
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/ape1.png"
 files = {'image': open(asset_fpath, 'rb')}
 r = session.post(url=api_url, files=files, headers=headers)
 print(r.status_code, r.reason, r.text)
+
 
 # /list_assets
 api_url = os.path.join(url_base, "list_assets")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, headers=headers)
 data = r.json()['data']
-file_path = data[0]['file_path']
+file_path = data[-1]['file_path']
+asset_uid = data[-1]['uid']
 print(r.status_code, r.reason, r.text)
+
+########################################################################################################################
+# TODO /overwrite_asset
+print(f"overwriting {file_path} {asset_uid}")
+
+api_url = os.path.join(url_base, "overwrite_asset")
+print(f"Calling: {api_url}")
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/droid_pfp.png"
+files = {'image': open(asset_fpath, 'rb')}
+json_data = {
+    "asset_uid": asset_uid,
+    "file_key": file_path,
+}
+r = session.post(url=api_url, files=files, headers=headers, data=json_data)
+print(r.status_code, r.reason, r.text)
+########################################################################################################################
 
 # /download_asset
 data = {'file_path': file_path}
