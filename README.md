@@ -33,6 +33,10 @@ body except for the /upload_asset endpoint which takes a FormData() object.
     - FormData() object with a single `image` field. 
     - asset_uid: int (of existing asset as form parameter)
     - file_key: str (of existing asset as form parameter)
+- `/delete_asset`
+  - Parameters:
+    - asset_uid: int (of existing asset as form parameter)
+    - file_key: str (of existing asset as form parameter)
 - `/update_asset_metadata`
   - Parameters: 
     - asset_uid: int
