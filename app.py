@@ -243,6 +243,31 @@ def handle_update_asset_metadata(user_uid):
         return format_response(False, response_code)
 
 
+########################################################################################################################
+# TODO implement delete asset
+@app.route("/delete_asset", methods=['POST'])
+@token_required
+def handle_delete_asset(user_uid):
+    try:
+        if user_uid:
+            asset_uid = request.json['asset_uid']
+
+            # TODO
+
+            return format_response(True, ResponseCodes.ASSET_UPDATE_SUCCESS.value)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+########################################################################################################################
+
 @app.route("/list_assets", methods=['POST'])
 @token_required
 def list_assets(user_uid):

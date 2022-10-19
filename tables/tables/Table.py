@@ -41,6 +41,23 @@ class Table:
         return records
 
     @classmethod
+    def delete(cls, **where):
+        if 'verbose' in where:
+            verbose = True
+            del where['verbose']
+        else:
+            verbose = False
+        query = f"DELETE FROM {cls._table_name}"
+        query = cls._build_where_clause(query, where)
+        if verbose:
+            logging.info(f"QUERY:\n{query}")
+        conn, cursor = utils.initialize_connection_and_cursor()
+        cursor.execute(query)
+        rowcount = cursor.rowcount
+        utils.close_connection_and_cursor(conn, cursor)
+        return rowcount
+
+    @classmethod
     def update(cls, values: dict, **where):
         query = f"UPDATE {cls._table_name} SET"
         for k, v in values.items():
