@@ -7,7 +7,7 @@ import time
 import os
 import io
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -95,6 +95,16 @@ data = {
 
 }
 api_url = os.path.join(url_base, "update_asset")
+print(f"Calling: {api_url}")
+r = session.post(url=api_url, json=data, headers=headers)
+print(r.status_code, r.reason, r.text)
+
+# TODO /delete_asset
+data = {
+    'asset_uid': asset_uid,
+    'file_key': file_path
+}
+api_url = os.path.join(url_base, "delete_asset")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data, headers=headers)
 print(r.status_code, r.reason, r.text)
