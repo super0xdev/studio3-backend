@@ -7,6 +7,7 @@ from response_utils.format_reponse import format_response
 import traceback
 from s3_utils.upload_asset import upload_asset
 from s3_utils.download_asset import download_asset
+from s3_utils.delete_asset import delete_asset
 from conf import consts as consts
 from functools import wraps
 import logging
@@ -243,18 +244,17 @@ def handle_update_asset_metadata(user_uid):
         return format_response(False, response_code)
 
 
-########################################################################################################################
-# TODO implement delete asset
 @app.route("/delete_asset", methods=['POST'])
 @token_required
 def handle_delete_asset(user_uid):
     try:
         if user_uid:
             asset_uid = request.json['asset_uid']
-
-            # TODO
-
-            return format_response(True, ResponseCodes.ASSET_UPDATE_SUCCESS.value)
+            file_key = request.json['file_key']
+            num_rows = tables.Assets.delete(uid=asset_uid, user_uid=user_uid)
+            assert num_rows == 1, f"{num_rows} deleted."
+            delete_asset(file_key)
+            return format_response(True, ResponseCodes.DELETE_ASSET_SUCCESS.value)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
     except Exception as e:
@@ -265,8 +265,6 @@ def handle_delete_asset(user_uid):
             response_code = str(e)
         return format_response(False, response_code)
 
-
-########################################################################################################################
 
 @app.route("/list_assets", methods=['POST'])
 @token_required
