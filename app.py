@@ -2,6 +2,7 @@ from solana_utils.verify_signature import verify_address_ownership
 from flask import Flask, jsonify, make_response, request, send_file
 from flask_cors import CORS
 from response_utils.response_codes import ResponseCodes
+import response_utils.exceptions as errs
 from response_utils.format_reponse import format_response
 import traceback
 from s3_utils.upload_asset import upload_asset
@@ -123,6 +124,9 @@ def handle_upload_asset(user_uid):
             image_bytes = request.files['image'].read()
             image_size_bytes = len(image_bytes)
 
+            if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
+
             tmp_fname = f"tmp_{int(time.time())}_{file_name}"
             tmp_fpath = os.path.join('/tmp', tmp_fname)
             with open(tmp_fpath, 'wb') as f:
@@ -166,6 +170,9 @@ def handle_overwrite_asset(user_uid):
             file_name = image_file.filename
             image_bytes = request.files['image'].read()
             image_size_bytes = len(image_bytes)
+
+            if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
 
             # save tmp
             tmp_fname = f"tmp_{int(time.time())}_{file_name}"
