@@ -215,6 +215,7 @@ def handle_update_asset_metadata(user_uid):
     try:
         if user_uid:
             asset_uid = request.json['asset_uid']
+            file_name = request.json['file_name']
             transaction_signature = request.json['transaction_signature']
             purchase_price = float(request.json['purchase_price'])
             purchase_type = request.json['purchase_type']
@@ -224,6 +225,7 @@ def handle_update_asset_metadata(user_uid):
             except KeyError as _e:
                 confirmation_timestamp = None
             values = {
+                "file_name": file_name,
                 "purchase_type": purchase_type,
                 "purchase_price": purchase_price,
                 "transaction_signature": transaction_signature,

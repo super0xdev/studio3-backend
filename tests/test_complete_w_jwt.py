@@ -109,4 +109,3 @@ print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data, headers=headers)
 print(r.status_code, r.reason, r.text)
 
-
