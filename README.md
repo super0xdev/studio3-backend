@@ -41,6 +41,7 @@ body except for the /upload_asset endpoint which takes a FormData() object.
   - Parameters: 
     - asset_uid: int
     - transaction_signature: str
+    - file_name: str
     - purchase_type: str
     - confirmed: bool
     - confirmation_timestamp: int (optional)
