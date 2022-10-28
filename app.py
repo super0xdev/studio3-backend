@@ -1,3 +1,11 @@
+"""
+sudo chmod 666 /var/run/docker.sock
+sudo aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 764328871980.dkr.ecr.us-east-2.amazonaws.com
+
+sudo docker build -t studio3-api-prod .
+docker tag studio3-api-prod:latest 764328871980.dkr.ecr.us-east-2.amazonaws.com/studio3-api-prod:latest
+docker push 764328871980.dkr.ecr.us-east-2.amazonaws.com/studio3-api-prod:latest
+"""
 from solana_utils.verify_signature import verify_address_ownership
 from flask import Flask, jsonify, make_response, request, send_file
 from flask_cors import CORS
@@ -305,9 +313,18 @@ def handle_download_asset(user_uid):
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
 
 
+@app.route('/')
+def home():
+    return format_response(True, "Hello World")
+
+
 @app.errorhandler(404)
 def resource_not_found(e):
     return make_response(jsonify(error='Not found!'), 404)
+
+
+if __name__ == "__main__":
+    app.run(threaded=True, host="0.0.0.0", port=8081)
 
 
 

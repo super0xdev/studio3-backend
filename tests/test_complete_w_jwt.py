@@ -10,7 +10,8 @@ import io
 PRODUCTION_MODE = True
 
 if PRODUCTION_MODE:
-    url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
+    # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
+    url_base = 'http://Studio3LoadBalancer-1478688032.us-east-2.elb.amazonaws.com'
 else:
     url_base = 'http://localhost:5000/'
 
@@ -64,7 +65,7 @@ print(f"overwriting {file_path} {asset_uid}")
 
 api_url = os.path.join(url_base, "overwrite_asset")
 print(f"Calling: {api_url}")
-asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/droid_pfp.png"
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/large_test_image.png"
 files = {'image': open(asset_fpath, 'rb')}
 json_data = {
     "asset_uid": asset_uid,
@@ -86,15 +87,16 @@ with open(local_fpath, 'wb') as f:
 
 # /update_asset
 data = {
-    'asset_uid': 11,
-    'transaction_signature': "5YBogpMypSw4BJgHcwYjqMxZrtsFsF6Nwa3nUrm92R2o5KPk38r5aN5fThRruAYZ7CkKmQ5BRberRzULSFTPF1FH",
+    'asset_uid': asset_uid,
+    'transaction_signature': "5ogpMypSw4BJgHcwYjqMxZrtsFsF6Nwa3nUrm92R2o5KPk38r5aN5fThRruAYZ7CkKmQ5BRberRzULSFTPF1FH",
     'purchase_price': 1.1,
     'purchase_type': 'IMAGE_2K_W_WATERMARK',
     'confirmed': 1,
-    'confirmation_timestamp': int(time.time())
+    'confirmation_timestamp': int(time.time()),
+    'file_name': "My First Filename..."
 
 }
-api_url = os.path.join(url_base, "update_asset")
+api_url = os.path.join(url_base, "update_asset_metadata")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data, headers=headers)
 print(r.status_code, r.reason, r.text)
