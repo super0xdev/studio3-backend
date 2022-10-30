@@ -7,7 +7,7 @@ import time
 import os
 import io
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -72,6 +72,17 @@ json_data = {
     "file_key": file_path,
 }
 r = session.post(url=api_url, files=files, headers=headers, data=json_data)
+print(r.status_code, r.reason, r.text)
+
+# TODO
+# /duplicate_asset
+print(f"duplicating {file_path} {asset_uid}")
+api_url = os.path.join(url_base, "duplicate_asset")
+print(f"Calling: {api_url}")
+json_data = {
+    "asset_uid": asset_uid,
+}
+r = session.post(url=api_url, headers=headers, data=json_data)
 print(r.status_code, r.reason, r.text)
 
 # /download_asset

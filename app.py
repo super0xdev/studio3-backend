@@ -14,6 +14,7 @@ import response_utils.exceptions as errs
 from response_utils.format_reponse import format_response
 import traceback
 from s3_utils.upload_asset import upload_asset
+from s3_utils.duplicate_asset import duplicate_asset
 from s3_utils.download_asset import download_asset
 from s3_utils.delete_asset import delete_asset
 from conf import consts as consts
@@ -215,6 +216,36 @@ def handle_overwrite_asset(user_uid):
         else:
             response_code = str(e)
         return format_response(False, response_code)
+
+
+# TODO #################################################################################################################
+@app.route("/duplicate_asset", methods=['POST'])
+@token_required
+def handle_duplicate_asset(user_uid):
+    try:
+        if user_uid:
+            asset_uid = request.form['asset_uid']
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+            new_file_key = duplicate_asset(source_asset.file_path, source_asset.file_name)
+            _result = tables.Assets.insert(file_path=new_file_key,
+                                           file_type=source_asset.file_type,
+                                           file_name=source_asset.file_name,
+                                           file_size_bytes=source_asset.file_size_bytes,
+                                           creation_timestamp=int(time.time()),
+                                           user_uid=user_uid)
+            file_path = os.path.join(consts.S3_BASE_URL, new_file_key)
+            asset_data = {'file_path': file_path}
+            return format_response(True, ResponseCodes.DUPLICATE_SUCCESS.value, data=asset_data)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+########################################################################################################################
 
 
 @app.route("/update_asset_metadata", methods=['POST'])
