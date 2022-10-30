@@ -218,7 +218,6 @@ def handle_overwrite_asset(user_uid):
         return format_response(False, response_code)
 
 
-# TODO #################################################################################################################
 @app.route("/duplicate_asset", methods=['POST'])
 @token_required
 def handle_duplicate_asset(user_uid):
@@ -245,7 +244,6 @@ def handle_duplicate_asset(user_uid):
         else:
             response_code = str(e)
         return format_response(False, response_code)
-########################################################################################################################
 
 
 @app.route("/update_asset_metadata", methods=['POST'])
