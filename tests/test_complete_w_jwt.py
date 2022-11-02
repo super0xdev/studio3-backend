@@ -7,7 +7,7 @@ import time
 import os
 import io
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -53,6 +53,15 @@ print(r.status_code, r.reason, r.text)
 
 # /list_assets
 api_url = os.path.join(url_base, "list_assets")
+print(f"Calling: {api_url}")
+r = session.post(url=api_url, headers=headers)
+data = r.json()['data']
+file_path = data[-1]['file_path']
+asset_uid = data[-1]['uid']
+print(r.status_code, r.reason, r.text)
+
+# /list_template_assets
+api_url = os.path.join(url_base, "list_template_assets")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, headers=headers)
 data = r.json()['data']

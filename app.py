@@ -324,6 +324,25 @@ def list_assets(user_uid):
         return format_response(False, response_code)
 
 
+@app.route("/list_template_assets", methods=['POST'])
+@token_required
+def list_template_assets(user_uid):
+    try:
+        if user_uid:
+            assets = tables.Assets.select(user_uid=consts.ADMIN_USER_UID)
+            asset_dicts = [x.to_dict() for x in assets]
+            return format_response(True, ResponseCodes.LIST_TEMPLATES_SUCCESS.value, data=asset_dicts)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
 @app.route("/download_asset", methods=['POST'])
 @token_required
 def handle_download_asset(user_uid):
