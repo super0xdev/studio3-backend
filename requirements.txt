@@ -12,9 +12,12 @@ charset-normalizer==2.1.0
 click==7.1.2
 construct==2.10.67
 construct-typing==0.5.2
+contourpy==1.0.6
+cycler==0.11.0
 dataclasses-json==0.5.7
 Flask==1.1.4
 Flask-Cors==3.0.10
+fonttools==4.38.0
 h11==0.12.0
 httpcore==0.15.0
 httpx==0.23.0
@@ -25,11 +28,14 @@ jmespath==1.0.1
 jsonrpcclient==4.0.2
 jsonrpcserver==5.0.7
 jsonschema==4.9.0
+kiwisolver==1.4.4
 MarkupSafe==2.0.1
 marshmallow==3.17.1
 marshmallow-enum==1.5.1
+matplotlib==3.6.2
 mypy-extensions==0.4.3
 mysql-connector-python==8.0.28
+numpy==1.23.4
 OSlash==0.6.3
 packaging==21.3
 Pillow==9.2.0
