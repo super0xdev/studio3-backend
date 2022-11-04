@@ -32,7 +32,6 @@ kiwisolver==1.4.4
 MarkupSafe==2.0.1
 marshmallow==3.17.1
 marshmallow-enum==1.5.1
-matplotlib==3.6.2
 mypy-extensions==0.4.3
 mysql-connector-python==8.0.28
 numpy==1.23.4

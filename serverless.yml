@@ -9,6 +9,9 @@ package:
     - ./venv/**
     - ./__pycache__/**
     - ./node_modules/**
+    - ./tmp_creds/**
+    - ./tmp_download/**
+    - ./tmp_upload/**
 
 custom:
   wsgi:
