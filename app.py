@@ -13,6 +13,7 @@ from response_utils.response_codes import ResponseCodes
 import response_utils.exceptions as errs
 from response_utils.format_reponse import format_response
 import traceback
+from image_utils.add_watermark import add_watermark
 from s3_utils.upload_asset import upload_asset
 from s3_utils.duplicate_asset import duplicate_asset
 from s3_utils.download_asset import download_asset
@@ -356,6 +357,7 @@ def handle_download_asset(user_uid):
             data = json.load(open(tmp_fpath))
             return format_response(True, ResponseCodes.DOWNLOAD_JSON_SUCCESS.value, data=data)
         else:
+            add_watermark(tmp_fpath)
             return send_file(tmp_fpath)
     else:
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
