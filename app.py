@@ -227,12 +227,16 @@ def handle_duplicate_asset(user_uid):
             asset_uid = request.form['asset_uid']
             source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
             new_file_key = duplicate_asset(source_asset.file_path, source_asset.file_name)
+            logging.info(f"inserting duplicated file")
+            print(f"inserting duplicated file")
             _result = tables.Assets.insert(file_path=new_file_key,
                                            file_type=source_asset.file_type,
                                            file_name=source_asset.file_name,
                                            file_size_bytes=source_asset.file_size_bytes,
                                            creation_timestamp=int(time.time()),
                                            user_uid=user_uid)
+            logging.info(f"inserted duplicated file: {new_file_key}")
+            print(f"inserted duplicated file: {new_file_key}")
             file_path = os.path.join(consts.S3_BASE_URL, new_file_key)
             asset_data = {'file_path': file_path}
             return format_response(True, ResponseCodes.DUPLICATE_SUCCESS.value, data=asset_data)

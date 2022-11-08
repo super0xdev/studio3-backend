@@ -7,11 +7,12 @@ import time
 import os
 import io
 
-PRODUCTION_MODE = False
+PRODUCTION_MODE = True
 
 if PRODUCTION_MODE:
-    url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
+    # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
     # url_base = 'http://studio3loadbalancer-1478688032.us-east-2.elb.amazonaws.com/'
+    url_base = 'https://api.studio3-dev.com/'
 else:
     url_base = 'http://localhost:5000/'
 
@@ -86,9 +87,10 @@ print(r.status_code, r.reason, r.text)
 # /duplicate_asset
 print(f"duplicating {file_path} {asset_uid}")
 api_url = os.path.join(url_base, "duplicate_asset")
+
 print(f"Calling: {api_url}")
 json_data = {
-    "asset_uid": asset_uid,
+    "asset_uid": 139,
 }
 r = session.post(url=api_url, headers=headers, data=json_data)
 print(r.status_code, r.reason, r.text)
