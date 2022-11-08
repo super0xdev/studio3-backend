@@ -224,8 +224,12 @@ def handle_overwrite_asset(user_uid):
 def handle_duplicate_asset(user_uid):
     try:
         if user_uid:
-            asset_uid = request.form['asset_uid']
+            asset_uid = request.json['asset_uid']
+            print(f"P: duplicatin assing uid: {asset_uid}")
+            logging.info(f"L: duplicatin assing uid: {asset_uid}")
             source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+            print(f"P: got source aset: {source_asset.file_path}")
+            logging.info(f"L: got source aset: {source_asset.file_path}")
             new_file_key = duplicate_asset(source_asset.file_path, source_asset.file_name)
             logging.info(f"inserting duplicated file")
             print(f"inserting duplicated file")
