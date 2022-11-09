@@ -1,6 +1,6 @@
 org: alphaprime8
-app: d3-studio
-service: DsAPI
+app: short-my-nft
+service: short-my-nft-api-dev
 
 frameworkVersion: '3'
 
@@ -9,9 +9,6 @@ package:
     - ./venv/**
     - ./__pycache__/**
     - ./node_modules/**
-    - ./tmp_creds/**
-    - ./tmp_download/**
-    - ./tmp_upload/**
 
 custom:
   wsgi:
@@ -26,7 +23,6 @@ functions:
     handler: wsgi_handler.handler
     events:
       - httpApi: '*'
-
 
 plugins:
   - serverless-wsgi

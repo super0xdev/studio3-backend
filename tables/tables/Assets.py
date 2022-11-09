@@ -14,6 +14,7 @@ class Assets(Table):
     # column names
     uid: int
     file_path: str
+    thumbnail_file_path: str
     file_type: str
     file_name: str
     file_size_bytes: int

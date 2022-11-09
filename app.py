@@ -14,6 +14,7 @@ import response_utils.exceptions as errs
 from response_utils.format_reponse import format_response
 import traceback
 from image_utils.add_watermark import add_watermark
+from image_utils.generate_thumbnail import generate_thumbnail
 from s3_utils.upload_asset import upload_asset
 from s3_utils.duplicate_asset import duplicate_asset
 from s3_utils.download_asset import download_asset
@@ -134,26 +135,28 @@ def handle_upload_asset(user_uid):
             file_type = file_name.split(".")[-1]
             image_bytes = request.files['image'].read()
             image_size_bytes = len(image_bytes)
-
             if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
                 raise errs.MaxFileSizeExceeded()
-
             tmp_fname = f"tmp_{int(time.time())}_{file_name}"
             tmp_fpath = os.path.join('/tmp', tmp_fname)
+            thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
-
             file_key = upload_asset(tmp_fpath, tmp_fname)
+            generate_thumbnail(tmp_fpath, thumbnail_fpath)
+            thumbnail_file_key = upload_asset(thumbnail_fpath, "thumbnail_"+tmp_fname)
             os.remove(tmp_fpath)
-
+            os.remove(thumbnail_fpath)
             _result = tables.Assets.insert(file_path=file_key,
+                                           thumbnail_file_path=thumbnail_file_key,
                                            file_type=file_type,
                                            file_name=file_name,
                                            file_size_bytes=image_size_bytes,
                                            creation_timestamp=int(time.time()),
                                            user_uid=user_uid)
             file_path = os.path.join(consts.S3_BASE_URL, file_key)
-            asset_data = {'file_path': file_path}
+            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, thumbnail_file_key)
+            asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path}
             return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -176,6 +179,9 @@ def handle_overwrite_asset(user_uid):
             asset_uid = request.form['asset_uid']
             file_key = request.form['file_key']
 
+            # TODO lookup thumbnail file key
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+
             # extract image data
             image_file = request.files['image']
             file_name = image_file.filename
@@ -187,12 +193,17 @@ def handle_overwrite_asset(user_uid):
 
             # save tmp
             tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+            thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
             tmp_fpath = os.path.join('/tmp', tmp_fname)
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
 
+            # TODO generate thumbnail
+            generate_thumbnail(tmp_fpath, thumbnail_fpath)
+
             # upload to s3 and cleanup
             _ = upload_asset(tmp_fpath, file_key, overwrite=True)
+            _ = upload_asset(thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
             os.remove(tmp_fpath)
 
             # update asset metadata
@@ -206,7 +217,8 @@ def handle_overwrite_asset(user_uid):
                                            user_uid=user_uid)
             assert _result == 1, "No asset was updated in database."
             file_path = os.path.join(consts.S3_BASE_URL, file_key)
-            asset_data = {'file_path': file_path}
+            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
+            asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path}
             return format_response(True, ResponseCodes.OVERWRITE_SUCCESS.value, data=asset_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -224,6 +236,8 @@ def handle_overwrite_asset(user_uid):
 def handle_duplicate_asset(user_uid):
     try:
         if user_uid:
+            print(f"P: requestion duplicate asset: {request.json}")
+            logging.info(f"L: requestion duplicate asset: {request.json}")
             asset_uid = request.json['asset_uid']
             print(f"P: duplicatin assing uid: {asset_uid}")
             logging.info(f"L: duplicatin assing uid: {asset_uid}")
