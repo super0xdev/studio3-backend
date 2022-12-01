@@ -161,7 +161,7 @@ def handle_upload_multi_asset(user_uid):
             meta_file = request.files['meta']
             meta_file_name = meta_file.filename
             # meta_file_type = meta_file_name.split(".")[-1]
-            meta_bytes = request.files['image'].read()
+            meta_bytes = request.files['meta'].read()
             meta_size_bytes = len(meta_bytes)
             if meta_size_bytes > consts.MAX_FILE_SIZE_BYTES:
                 raise errs.MaxFileSizeExceeded()
