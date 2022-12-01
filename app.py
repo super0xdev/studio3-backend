@@ -125,6 +125,91 @@ def update_profile(user_uid):
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
 
 
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+# TODO update upload asset for 3 file upload
+@app.route("/upload_multi_asset", methods=['POST'])
+@token_required
+def handle_upload_multi_asset(user_uid):
+    try:
+        if user_uid:
+
+            # parse and upload image file
+            image_file = request.files['image']
+            image_file_name = image_file.filename
+            image_file_type = image_file_name.split(".")[-1]
+            image_bytes = request.files['image'].read()
+            image_size_bytes = len(image_bytes)
+            if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
+            tmp_fname = f"tmp_{int(time.time())}_{image_file_name}"
+            tmp_fpath = os.path.join('/tmp', tmp_fname)
+            thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
+            with open(tmp_fpath, 'wb') as f:
+                f.write(image_bytes)
+            image_file_key = upload_asset(tmp_fpath, tmp_fname)
+            generate_thumbnail(tmp_fpath, thumbnail_fpath)
+            thumbnail_file_key = upload_asset(thumbnail_fpath, "thumbnail_"+tmp_fname)
+            os.remove(tmp_fpath)
+            os.remove(thumbnail_fpath)
+
+            ###################################################################
+            # parse and upload meta file
+
+            meta_file = request.files['meta']
+            meta_file_name = meta_file.filename
+            # meta_file_type = meta_file_name.split(".")[-1]
+            meta_bytes = request.files['image'].read()
+            meta_size_bytes = len(meta_bytes)
+            if meta_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
+            tmp_fname = f"tmp_{int(time.time())}_{meta_file_name}"
+            tmp_fpath = os.path.join('/tmp', tmp_fname)
+            with open(tmp_fpath, 'wb') as f:
+                f.write(meta_bytes)
+            meta_file_key = upload_asset(tmp_fpath, tmp_fname)
+            os.remove(tmp_fpath)
+
+            _result = tables.Assets.insert(
+                file_path=image_file_key,
+                thumbnail_file_path=thumbnail_file_key,
+                file_type=image_file_type,
+                file_name=image_file_name,
+                file_size_bytes=image_size_bytes,
+                meta_file_path=meta_file_key,
+                creation_timestamp=int(time.time()),
+                user_uid=user_uid)
+
+            image_file_path = os.path.join(consts.S3_BASE_URL, image_file_key)
+            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, thumbnail_file_key)
+            meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
+
+            asset_data = {'image_file_path': image_file_path,
+                          "thumbnail_file_path": thumbnail_file_path,
+                          'meta_file_path': meta_file_path}
+            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+
+
+
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
 @app.route("/upload_asset", methods=['POST'])
 @token_required
 def handle_upload_asset(user_uid):
@@ -179,7 +264,7 @@ def handle_overwrite_asset(user_uid):
             asset_uid = request.form['asset_uid']
             file_key = request.form['file_key']
 
-            # TODO lookup thumbnail file key
+            # lookup thumbnail file key
             source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
 
             # extract image data
@@ -198,7 +283,7 @@ def handle_overwrite_asset(user_uid):
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
 
-            # TODO generate thumbnail
+            # generate thumbnail
             generate_thumbnail(tmp_fpath, thumbnail_fpath)
 
             # upload to s3 and cleanup
