@@ -63,8 +63,6 @@ files = {
 r = session.post(url=api_url, files=files, headers=headers)
 print(r.status_code, r.reason, r.text)
 
-
-
 # /list_assets
 api_url = os.path.join(url_base, "list_assets")
 print(f"Calling: {api_url}")
