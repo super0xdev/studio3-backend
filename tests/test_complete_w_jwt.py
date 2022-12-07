@@ -2,12 +2,10 @@ from solana.keypair import Keypair
 import requests
 import pickle
 import base58
-import json
 import time
 import os
-import io
 
-PRODUCTION_MODE = False
+PRODUCTION_MODE = True
 
 if PRODUCTION_MODE:
     # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -95,7 +93,7 @@ json_data = {
 r = session.post(url=api_url, files=files, headers=headers, data=json_data)
 print(r.status_code, r.reason, r.text)
 
-# TODO TESTS
+# TESTS
 # /overwrite_multi_asset
 print(f"overwriting {file_path} {asset_uid}")
 
