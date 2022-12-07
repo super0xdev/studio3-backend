@@ -254,6 +254,100 @@ def handle_upload_asset(user_uid):
         return format_response(False, response_code)
 
 
+#######################################################################################################################
+@app.route("/overwrite_multi_asset", methods=['POST'])
+@token_required
+def handle_overwrite_multi_asset(user_uid):
+    try:
+        if user_uid:
+
+            # extract existing file params
+            asset_uid = request.form['asset_uid']
+            file_key = request.form['file_key']
+
+            # lookup thumbnail file key
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+
+            # extract image data
+            image_file = request.files['image']
+            file_name = image_file.filename
+            image_bytes = request.files['image'].read()
+            image_size_bytes = len(image_bytes)
+
+            if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
+
+            # save tmp
+            tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+            thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
+            tmp_fpath = os.path.join('/tmp', tmp_fname)
+            with open(tmp_fpath, 'wb') as f:
+                f.write(image_bytes)
+
+            # generate thumbnail
+            generate_thumbnail(tmp_fpath, thumbnail_fpath)
+
+            # upload to s3 and cleanup
+            _ = upload_asset(tmp_fpath, file_key, overwrite=True)
+            _ = upload_asset(thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
+            os.remove(tmp_fpath)
+
+
+            # upload meta
+            ###############################
+            meta_file = request.files['meta']
+            meta_file_name = meta_file.filename
+            # meta_file_type = meta_file_name.split(".")[-1]
+            meta_bytes = request.files['meta'].read()
+            meta_size_bytes = len(meta_bytes)
+            if meta_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
+            tmp_fname = f"tmp_{int(time.time())}_{meta_file_name}"
+            tmp_fpath = os.path.join('/tmp', tmp_fname)
+            with open(tmp_fpath, 'wb') as f:
+                f.write(meta_bytes)
+            meta_file_key = upload_asset(tmp_fpath, tmp_fname)
+            os.remove(tmp_fpath)
+
+            ###############################
+
+            # update asset metadata
+            values = {
+                "file_size_bytes": image_size_bytes,
+                "update_timestamp": int(time.time()),
+                "meta_file_path": meta_file_key,
+            }
+            _result = tables.Assets.update(values,
+                                           uid=asset_uid,
+                                           file_path=file_key,
+                                           user_uid=user_uid)
+            assert _result == 1, "No asset was updated in database."
+            file_path = os.path.join(consts.S3_BASE_URL, file_key)
+            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
+            meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
+
+            asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path, "meta_file_path":meta_file_path}
+
+            return format_response(True, ResponseCodes.OVERWRITE_SUCCESS.value, data=asset_data)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+
+
+
+
+
+#######################################################################################################################
+
+
 @app.route("/overwrite_asset", methods=['POST'])
 @token_required
 def handle_overwrite_asset(user_uid):
