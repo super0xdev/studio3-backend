@@ -7,7 +7,7 @@ import time
 import os
 import io
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -88,6 +88,22 @@ api_url = os.path.join(url_base, "overwrite_asset")
 print(f"Calling: {api_url}")
 asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/image_thumbnail.png"
 files = {'image': open(asset_fpath, 'rb')}
+json_data = {
+    "asset_uid": asset_uid,
+    "file_key": file_path,
+}
+r = session.post(url=api_url, files=files, headers=headers, data=json_data)
+print(r.status_code, r.reason, r.text)
+
+# TODO TESTS
+# /overwrite_multi_asset
+print(f"overwriting {file_path} {asset_uid}")
+
+api_url = os.path.join(url_base, "overwrite_multi_asset")
+print(f"Calling: {api_url}")
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/image_thumbnail.png"
+meta_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/test_meta_1.json"
+files = {'image': open(asset_fpath, 'rb'), 'meta': open(meta_fpath, 'rb')}
 json_data = {
     "asset_uid": asset_uid,
     "file_key": file_path,
