@@ -261,9 +261,13 @@ def handle_overwrite_multi_asset(user_uid):
     try:
         if user_uid:
 
+            logging.info(f"inside overwrite")
+
             # extract existing file params
             asset_uid = request.form['asset_uid']
             file_key = request.form['file_key']
+
+            logging.info(f"got asset_uid: {asset_uid}, file_key: {file_key}")
 
             # lookup thumbnail file key
             source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
@@ -274,39 +278,59 @@ def handle_overwrite_multi_asset(user_uid):
             image_bytes = request.files['image'].read()
             image_size_bytes = len(image_bytes)
 
+            logging.info(f"got image file: {file_name}, {image_bytes} bytes")
+
             if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
                 raise errs.MaxFileSizeExceeded()
 
             # save tmp
-            tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+            tmp_fname = f"tmp_{int(random.random()*1000)}_{int(time.time())}_{file_name}"
             thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
             tmp_fpath = os.path.join('/tmp', tmp_fname)
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
 
+            logging.info(f"saved image")
+
             # generate thumbnail
-            generate_thumbnail(tmp_fpath, thumbnail_fpath)
+            try:
+                generate_thumbnail(tmp_fpath, thumbnail_fpath)
+                _ = upload_asset(thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
+            except Exception as e:
+                logging.error(f"exception on thumbnail: {e}")
+                logging.info(traceback.format_exc())
+                logging.info("failed to update thumbnail...")
+
+            logging.info(f"overwriting image and thumbnail")
 
             # upload to s3 and cleanup
             _ = upload_asset(tmp_fpath, file_key, overwrite=True)
-            _ = upload_asset(thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
             os.remove(tmp_fpath)
 
+            logging.info(f"overwrite complete")
 
             # upload meta
             ###############################
             meta_file = request.files['meta']
             meta_file_name = meta_file.filename
+
+            logging.info(f"got meta_file_name: {meta_file_name}")
+
             # meta_file_type = meta_file_name.split(".")[-1]
             meta_bytes = request.files['meta'].read()
             meta_size_bytes = len(meta_bytes)
+
+            logging.info(f"got meta bytes: {meta_size_bytes}")
+
             if meta_size_bytes > consts.MAX_FILE_SIZE_BYTES:
                 raise errs.MaxFileSizeExceeded()
-            tmp_fname = f"tmp_{int(time.time())}_{meta_file_name}"
+            tmp_fname = f"tmp_{int(time.time())}_{meta_file_name}_{int(random.random()*1000)}"
             tmp_fpath = os.path.join('/tmp', tmp_fname)
+            logging.info(f"writing meta")
             with open(tmp_fpath, 'wb') as f:
                 f.write(meta_bytes)
             meta_file_key = upload_asset(tmp_fpath, tmp_fname)
+            logging.info(f"uploaded meta with key: {meta_file_key}")
             os.remove(tmp_fpath)
 
             ###############################
