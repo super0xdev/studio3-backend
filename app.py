@@ -4,7 +4,6 @@ aws ecr get-login-password --region us-east-2 | docker login --username AWS --pa
 
 sudo docker build -t studio3api .
 docker tag studio3api:latest 707000167678.dkr.ecr.us-east-2.amazonaws.com/studio3api:latest
-
 docker push 707000167678.dkr.ecr.us-east-2.amazonaws.com/studio3api:latest
 
 """
