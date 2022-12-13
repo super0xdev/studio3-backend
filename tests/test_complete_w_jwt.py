@@ -10,7 +10,8 @@ PRODUCTION_MODE = True
 if PRODUCTION_MODE:
     # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
     # url_base = 'http://studio3loadbalancer-1478688032.us-east-2.elb.amazonaws.com/'
-    url_base = 'https://api.studio3-dev.com/'
+    # url_base = 'https://api.studio3-dev.com/'
+    url_base = 'https://prod.studio3-dev.com/'
 else:
     url_base = 'http://localhost:5000/'
 

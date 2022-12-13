@@ -5,7 +5,8 @@ import uuid
 load_dotenv()
 import logging
 
-bucket_name = "d3-studio-assets-1660843754077"
+# bucket_name = "d3-studio-assets-1660843754077"
+bucket_name = "d3-studio-assets"
 
 
 def rand_prefix():
