@@ -4,8 +4,8 @@ import os
 load_dotenv()
 import logging
 
-bucket_name = "d3-studio-assets-1660843754077"
-
+# bucket_name = "d3-studio-assets-1660843754077"
+bucket_name = os.environ.get("bucket_name")
 
 def download_asset(file_key):
     aws_access_key_id = os.environ.get("s3_aws_access_key_id")

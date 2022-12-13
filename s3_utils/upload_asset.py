@@ -6,7 +6,7 @@ load_dotenv()
 import logging
 
 # bucket_name = "d3-studio-assets-1660843754077"
-bucket_name = "d3-studio-assets"
+bucket_name = os.environ.get("bucket_name")
 
 
 def rand_prefix():
