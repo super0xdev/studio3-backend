@@ -1,10 +1,10 @@
 """
 sudo chmod 666 /var/run/docker.sock
-sudo aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 764328871980.dkr.ecr.us-east-2.amazonaws.com
+aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 707000167678.dkr.ecr.us-east-2.amazonaws.com
 
 sudo docker build -t studio3-api-prod .
-docker tag studio3-api-prod:latest 764328871980.dkr.ecr.us-east-2.amazonaws.com/studio3-api-prod:latest
-docker push 764328871980.dkr.ecr.us-east-2.amazonaws.com/studio3-api-prod:latest
+docker tag studio3-api-prod:latest 707000167678.dkr.ecr.us-east-2.amazonaws.com/studio3api:latest
+docker push 707000167678.dkr.ecr.us-east-2.amazonaws.com/studio3api:latest
 """
 from solana_utils.verify_signature import verify_address_ownership
 from flask import Flask, jsonify, make_response, request, send_file
