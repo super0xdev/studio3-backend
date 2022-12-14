@@ -5,7 +5,7 @@ import base58
 import time
 import os
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
@@ -17,9 +17,13 @@ else:
     url_base = 'http://localhost:5000/'
 
 # load test keypair
-secrey_key_hex = pickle.load(open('./tmp_creds/secret_key_hex_str.p', 'rb'))
-secret_key = bytes.fromhex(secrey_key_hex)
-keypair = Keypair.from_secret_key(secret_key)
+USE_NEW  = True
+if USE_NEW:
+    keypair = Keypair.generate()
+else:
+    secrey_key_hex = pickle.load(open('./tmp_creds/secret_key_hex_str.p', 'rb'))
+    secret_key = bytes.fromhex(secrey_key_hex)
+    keypair = Keypair.from_secret_key(secret_key)
 
 # sign auth message
 timestamp = int(time.time())

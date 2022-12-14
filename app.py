@@ -73,6 +73,7 @@ def login():
 
         # lookup user
         users = tables.Users.select(address=address)
+        print(f"got userse: {users}")
         data = {}
         if len(users) == 0:
             # crete new user
