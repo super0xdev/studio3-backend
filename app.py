@@ -357,8 +357,12 @@ def handle_overwrite_multi_asset(user_uid):
             file_path = os.path.join(consts.S3_BASE_URL, file_key)
             logging.info(f"got 4")
             # TODO maybe error
-            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
-            logging.info(f"got 5")
+            try:
+                thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
+                logging.info(f"got 5")
+            except:
+                logging.info("got no thumbnail file path")
+                thumbnail_file_path = ""
             # TODO maybe error
             meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
             logging.info(f"got 5")
@@ -370,6 +374,8 @@ def handle_overwrite_multi_asset(user_uid):
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
     except Exception as e:
         print(traceback.format_exc())
+        logging.info(f"TOP LEVEL OVERWRITE ERROR")
+        logging.info(traceback.format_exc())
         if hasattr(e, "code"):
             response_code = e.code
         else:
