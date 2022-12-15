@@ -17,7 +17,7 @@ else:
     url_base = 'http://localhost:5000/'
 
 # load test keypair
-USE_NEW  = True
+USE_NEW = False
 if USE_NEW:
     keypair = Keypair.generate()
 else:
@@ -126,6 +126,19 @@ json_data = {
 r = session.post(url=api_url, headers=headers, data=json_data)
 print(r.status_code, r.reason, r.text)
 
+############################
+# /duplicate_multi_asset
+print(f"duplicating {file_path} {asset_uid}")
+api_url = os.path.join(url_base, "duplicate_multi_asset")
+
+print(f"Calling: {api_url}")
+json_data = {
+    "asset_uid": asset_uid,
+}
+r = session.post(url=api_url, headers=headers, json=json_data)
+print(r.status_code, r.reason, r.text)
+
+############################
 # /download_asset
 data = {'file_path': file_path}
 api_url = os.path.join(url_base, "download_asset")
