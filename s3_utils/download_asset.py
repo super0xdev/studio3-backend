@@ -7,6 +7,7 @@ import logging
 # bucket_name = "d3-studio-assets-1660843754077"
 bucket_name = os.environ.get("bucket_name")
 
+
 def download_asset(file_key):
     aws_access_key_id = os.environ.get("s3_aws_access_key_id")
     aws_secret_access_key = os.environ.get("s3_aws_secret_access_key")

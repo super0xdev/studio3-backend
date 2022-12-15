@@ -3,7 +3,7 @@ from PIL import Image
 
 
 def add_watermark(asset_fpath):
-    watermark_fpath = "./image_utils/watermark.png"
+    watermark_fpath = "./image_utils/studio3_watermark.png"
 
     asset_image = Image.open(asset_fpath)
     watermark_image = Image.open(watermark_fpath)

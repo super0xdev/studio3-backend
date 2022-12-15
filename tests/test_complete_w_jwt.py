@@ -4,6 +4,7 @@ import pickle
 import base58
 import time
 import os
+import random
 
 PRODUCTION_MODE = False
 
@@ -175,4 +176,20 @@ api_url = os.path.join(url_base, "delete_asset")
 print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data, headers=headers)
 print(r.status_code, r.reason, r.text)
+
+# TODO
+# /export asset
+api_url = os.path.join(url_base, "export_asset")
+print(f"Calling: {api_url}")
+asset_fpath = "/home/alphaprime8/PycharmProjects/DsAPI/tmp_upload/droid_alpha.png"
+files = {'image': open(asset_fpath, 'rb')}
+r = session.post(url=api_url, files=files, headers=headers)
+print(r.status_code, r.reason)
+local_fpath = f"./tmp_download/{int(time.time()*1000)}_{int(random.random()*1000)}.png"
+with open(local_fpath, 'wb') as f:
+    f.write(r.content)
+    print(f"Save image to local file: {local_fpath}")
+
+
+
 

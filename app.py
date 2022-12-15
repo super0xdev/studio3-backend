@@ -616,6 +616,33 @@ def list_template_assets(user_uid):
         return format_response(False, response_code)
 
 
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+# TODO EXPORT ASSET
+@app.route("/export_asset", methods=['POST'])
+@token_required
+def handle_export_asset(user_uid):
+    if user_uid:
+        image_file = request.files['image']
+        image_file_name = image_file.filename
+        image_bytes = request.files['image'].read()
+        image_size_bytes = len(image_bytes)
+        if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+            raise errs.MaxFileSizeExceeded()
+        tmp_fname = f"tmp_{int(time.time())}_{image_file_name}"
+        tmp_fpath = os.path.join('/tmp', tmp_fname)
+        with open(tmp_fpath, 'wb') as f:
+            f.write(image_bytes)
+        add_watermark(tmp_fpath)
+        return send_file(tmp_fpath)
+    else:
+        return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 @app.route("/download_asset", methods=['POST'])
 @token_required
 def handle_download_asset(user_uid):
