@@ -177,7 +177,6 @@ print(f"Calling: {api_url}")
 r = session.post(url=api_url, json=data, headers=headers)
 print(r.status_code, r.reason, r.text)
 
-# TODO
 # /export asset
 api_url = os.path.join(url_base, "export_asset")
 print(f"Calling: {api_url}")
