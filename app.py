@@ -286,8 +286,12 @@ def handle_overwrite_multi_asset(user_uid):
 
             # save tmp
             tmp_fname = f"tmp_{int(random.random()*1000)}_{int(time.time())}_{file_name}"
+            # TODO maybe error
+            logging.info(f"got 1")
             thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
+            # TODO maybe error
             tmp_fpath = os.path.join('/tmp', tmp_fname)
+            logging.info(f"got 2")
             with open(tmp_fpath, 'wb') as f:
                 f.write(image_bytes)
 
@@ -326,7 +330,9 @@ def handle_overwrite_multi_asset(user_uid):
             if meta_size_bytes > consts.MAX_FILE_SIZE_BYTES:
                 raise errs.MaxFileSizeExceeded()
             tmp_fname = f"tmp_{int(time.time())}_{meta_file_name}_{int(random.random()*1000)}"
+            # TODO maybe error
             tmp_fpath = os.path.join('/tmp', tmp_fname)
+            logging.info(f"got 3")
             logging.info(f"writing meta")
             with open(tmp_fpath, 'wb') as f:
                 f.write(meta_bytes)
@@ -347,9 +353,15 @@ def handle_overwrite_multi_asset(user_uid):
                                            file_path=file_key,
                                            user_uid=user_uid)
             assert _result == 1, "No asset was updated in database."
+            # TODO maybe error
             file_path = os.path.join(consts.S3_BASE_URL, file_key)
+            logging.info(f"got 4")
+            # TODO maybe error
             thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
+            logging.info(f"got 5")
+            # TODO maybe error
             meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
+            logging.info(f"got 5")
 
             asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path, "meta_file_path":meta_file_path}
 
