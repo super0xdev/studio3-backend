@@ -365,7 +365,7 @@ def handle_overwrite_multi_asset(user_uid):
                 thumbnail_file_path = ""
             # TODO maybe error
             meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
-            logging.info(f"got 5")
+            logging.info(f"got 6")
 
             asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path, "meta_file_path":meta_file_path}
 
