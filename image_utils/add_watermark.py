@@ -34,5 +34,6 @@ def add_watermark(asset_fpath):
     final_image = copied_image.convert('RGB')
 
     # TODO error occuring here
+    # TODO might need to change path name to .jpg?????
     final_image.save(asset_fpath)
 
