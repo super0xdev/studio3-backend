@@ -31,5 +31,8 @@ def add_watermark(asset_fpath):
     copied_image = asset_image.copy()
     copied_image.paste(watermark_image, (50, 50))
 
-    copied_image.save(asset_fpath)
+    final_image = copied_image.convert('RGB')
+
+    # TODO error occuring here
+    final_image.save(asset_fpath)
 
