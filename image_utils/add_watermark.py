@@ -43,7 +43,7 @@ def add_watermark(asset_fpath):
 
     copied_image = asset_image.copy()
     # copied_image.paste(watermark_image, (16, 16))
-    copied_image.paste(watermark_image, (asset_width - 15 - target_width, asset_height - target_height - 16))
+    copied_image.paste(watermark_image, (asset_width - 15 - target_width, asset_height - target_height - 16), watermark_image)
 
     # TODO maybe save sa jepg for alpha...
     final_image = copied_image.convert('RGB')
