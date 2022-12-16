@@ -4,9 +4,8 @@ from PIL import Image
 
 def add_watermark(asset_fpath):
 
-    # TODO make dynamic
 
-    watermark_fpath = "./image_utils/studio3_watermark.png"
+    watermark_fpath = "./image_utils/s2_watermakrk_1.png"
 
     asset_image = Image.open(asset_fpath)
 
@@ -22,18 +21,18 @@ def add_watermark(asset_fpath):
 
     mark_ar = mark_width / mark_width
 
-    target_height = int(asset_height/4)
+    target_height = int(asset_height/3)
     target_width = int(target_height * mark_ar)
 
     # TOD rever height and width?
     watermark_image.thumbnail((target_width, target_height))
+    result = watermark_image.putalpha(250)
+    print(f"got result put alpha: {result}")
 
     copied_image = asset_image.copy()
-    copied_image.paste(watermark_image, (50, 50))
+    copied_image.paste(watermark_image, (asset_width-16-target_width, asset_height-16-target_height))
 
     final_image = copied_image.convert('RGB')
 
-    # TODO error occuring here
-    # TODO might need to change path name to .jpg?????
     final_image.save(asset_fpath)
 

@@ -6,7 +6,7 @@ import time
 import os
 import random
 
-PRODUCTION_MODE = True
+PRODUCTION_MODE = False
 
 if PRODUCTION_MODE:
     # url_base = 'https://j0624ut64a.execute-api.us-east-1.amazonaws.com/'
