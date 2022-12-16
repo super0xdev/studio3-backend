@@ -39,13 +39,13 @@ def add_watermark(asset_fpath):
     watermark_image.thumbnail((target_width, target_height))
 
     print(f"got thumbnail: {watermark_image}")
-    watermark_image.putalpha(240)
+    watermark_image.putalpha(80)
 
     copied_image = asset_image.copy()
     copied_image.paste(watermark_image, (16, 16))
 
     # TODO maybe save sa jepg for alpha...
-    final_image = copied_image.convert('RGBA')
+    final_image = copied_image.convert('RGB')
 
     final_name = f'/tmp/final_{time.time()}_{random.random()}_{asset_name}.png'
     print(f"final_name: {final_name}")
