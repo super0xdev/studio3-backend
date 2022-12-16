@@ -39,7 +39,7 @@ def add_watermark(asset_fpath):
     watermark_image.thumbnail((target_width, target_height))
 
     print(f"got thumbnail: {watermark_image}")
-    watermark_image.putalpha(80)
+    # watermark_image.putalpha(80)
 
     copied_image = asset_image.copy()
     # copied_image.paste(watermark_image, (16, 16))
