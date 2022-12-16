@@ -646,11 +646,12 @@ def handle_export_asset(user_uid):
         if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
             raise errs.MaxFileSizeExceeded()
         tmp_fname = f"tmp_{int(time.time())}_{image_file_name}"
+        # TODO consider useing jpeg
         tmp_fpath = os.path.join('/tmp', tmp_fname)
         with open(tmp_fpath, 'wb') as f:
             f.write(image_bytes)
-        add_watermark(tmp_fpath)
-        return send_file(tmp_fpath)
+        export_fpath = add_watermark(tmp_fpath)
+        return send_file(export_fpath)
     else:
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
 
