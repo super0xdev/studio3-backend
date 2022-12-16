@@ -26,7 +26,7 @@ def add_watermark(asset_fpath):
 
     # TOD rever height and width?
     watermark_image.thumbnail((target_width, target_height))
-    result = watermark_image.putalpha(250)
+    result = watermark_image.putalpha(85)
     print(f"got result put alpha: {result}")
 
     copied_image = asset_image.copy()
