@@ -13,10 +13,12 @@ def verify_address_ownership(pubkey_str: str, signed_timestamp: int, signature_b
     slot_diff = latest_timestamp - int(signed_timestamp)
     slot_invalid = abs(slot_diff) > MAX_DELAY_SECONDS
     if slot_invalid:
-        print(f"Received invalid timestamp: {signed_timestamp}. Difference from current timestamp: {latest_timestamp} is {slot_diff}, which must be less than {MAX_DELAY_SECONDS} slots old.")
+        print(
+            f"Received invalid timestamp: {signed_timestamp}. Difference from current timestamp: {latest_timestamp} is {slot_diff}, which must be less than {MAX_DELAY_SECONDS} slots old.")
         raise errors.InvalidTimestamp()
     pubkey = bytes(PublicKey(pubkey_str))
-    msg = bytes(str(signed_timestamp), 'utf8')
+    msg = bytes(
+        f"Please sign this message to login to Studio 3\n\nTimestamp: {signed_timestamp}", 'utf-8')
     signature = base58.b58decode(signature_b58)
     try:
         VerifyKey(
@@ -28,5 +30,3 @@ def verify_address_ownership(pubkey_str: str, signed_timestamp: int, signature_b
     except nacl.exceptions.BadSignatureError as _e:
         raise errors.InvalidSignature()
     return True
-
-
