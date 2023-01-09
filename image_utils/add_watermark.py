@@ -22,28 +22,35 @@ def add_watermark(asset_fpath):
 
     print(f"opening svg")
     watermark_image = Image.open('./image_utils/s2_watermakrk_1.png')
-    print(f"loading watermarke svg: {watermark_image.height}, {watermark_image.width}")
+    print(
+        f"loading watermarke svg: {watermark_image.height}, {watermark_image.width}")
     mark_height = watermark_image.height
     mark_width = watermark_image.width
     print(f"mark height, width, {mark_height}, {mark_width}")
 
     mark_ar = mark_height / mark_width
 
-    target_width = int(asset_width / 3)
+    target_width = int(asset_width / 4)
     target_height = int(target_width * mark_ar)
 
     print(f"render watermakrk")
 
     # TOD rever height and width?
     print(f"watermarker {target_width}, {target_height}")
-    watermark_image.thumbnail((target_width, target_height))
-
-    print(f"got thumbnail: {watermark_image}")
     # watermark_image.putalpha(80)
+
+    watermark_image.thumbnail((target_width, target_height))
+    print(f"got thumbnail: {watermark_image}")
 
     copied_image = asset_image.copy()
     # copied_image.paste(watermark_image, (16, 16))
-    copied_image.paste(watermark_image, (asset_width - 15 - target_width, asset_height - target_height - 16), watermark_image)
+    if watermark_image.mode != 'RGBA':
+        alpha = Image.new('L', watermark_image.size, 255)
+        watermark_image.putalpha(alpha)
+    paste_mask = watermark_image.split()[3].point(lambda i: i * 33 / 100.)
+
+    copied_image.paste(watermark_image, (asset_width - 15 - target_width,
+                       asset_height - target_height - 16), mask=paste_mask)
 
     # TODO maybe save sa jepg for alpha...
     final_image = copied_image.convert('RGB')
@@ -52,4 +59,3 @@ def add_watermark(asset_fpath):
     print(f"final_name: {final_name}")
     final_image.save(final_name)
     return final_name
-
