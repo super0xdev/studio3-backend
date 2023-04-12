@@ -28,3 +28,6 @@ class Assets(Table):
     creation_timestamp: int
     confirmation_timestamp: int
     update_timestamp: int
+    tab: str
+    tags: str
+    collection: str

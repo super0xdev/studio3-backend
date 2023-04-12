@@ -53,7 +53,8 @@ def token_required(f):
             return jsonify({'message': 'a valid token is missing'})
         try:
             print(f"decoding token")
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            data = jwt.decode(
+                token, app.config['SECRET_KEY'], algorithms=["HS256"])
             user_uid = data['user_uid']
         except Exception as _e:
             print(traceback.format_exc())
@@ -88,11 +89,13 @@ def login():
             response_code = ResponseCodes.LOGIN_SUCCESS.value
             user: tables.Users = users[0]
             user_uid = user.uid
-            data.update({"address": str(user.address), "user_uid": user_uid, 'username': user.username, 'email': user.email})
+            data.update({"address": str(user.address), "user_uid": user_uid,
+                        'username': user.username, 'email': user.email})
 
         # generate jwt
         token = jwt.encode(
-            {'user_uid': user_uid, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=45)},
+            {'user_uid': user_uid, 'exp': datetime.datetime.utcnow() +
+             datetime.timedelta(minutes=45)},
             app.config['SECRET_KEY'], "HS256")
         data['token'] = token
         return format_response(True, response_code, data)
@@ -127,7 +130,6 @@ def update_profile(user_uid):
         return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
 
 
-
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -152,7 +154,8 @@ def handle_upload_multi_asset(user_uid):
                 f.write(image_bytes)
             image_file_key = upload_asset(tmp_fpath, tmp_fname)
             generate_thumbnail(tmp_fpath, thumbnail_fpath)
-            thumbnail_file_key = upload_asset(thumbnail_fpath, "thumbnail_"+tmp_fname)
+            thumbnail_file_key = upload_asset(
+                thumbnail_fpath, "thumbnail_"+tmp_fname)
             os.remove(tmp_fpath)
             os.remove(thumbnail_fpath)
 
@@ -184,7 +187,8 @@ def handle_upload_multi_asset(user_uid):
                 user_uid=user_uid)
 
             image_file_path = os.path.join(consts.S3_BASE_URL, image_file_key)
-            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, thumbnail_file_key)
+            thumbnail_file_path = os.path.join(
+                consts.S3_BASE_URL, thumbnail_file_key)
             meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
 
             asset_data = {'image_file_path': image_file_path,
@@ -200,11 +204,6 @@ def handle_upload_multi_asset(user_uid):
         else:
             response_code = str(e)
         return format_response(False, response_code)
-
-
-
-
-
 
 
 ########################################################################################################################
@@ -230,19 +229,93 @@ def handle_upload_asset(user_uid):
                 f.write(image_bytes)
             file_key = upload_asset(tmp_fpath, tmp_fname)
             generate_thumbnail(tmp_fpath, thumbnail_fpath)
-            thumbnail_file_key = upload_asset(thumbnail_fpath, "thumbnail_"+tmp_fname)
+            thumbnail_file_key = upload_asset(
+                thumbnail_fpath, "thumbnail_"+tmp_fname)
             os.remove(tmp_fpath)
             os.remove(thumbnail_fpath)
+            tab = request.form['tab']
+            collection = request.form['collection']
+            tags = request.form['tags']
             _result = tables.Assets.insert(file_path=file_key,
                                            thumbnail_file_path=thumbnail_file_key,
                                            file_type=file_type,
                                            file_name=file_name,
                                            file_size_bytes=image_size_bytes,
                                            creation_timestamp=int(time.time()),
-                                           user_uid=user_uid)
+                                           user_uid=user_uid,
+                                           tab=tab,
+                                           collection=collection,
+                                           tags=tags)
             file_path = os.path.join(consts.S3_BASE_URL, file_key)
-            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, thumbnail_file_key)
-            asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path}
+            thumbnail_file_path = os.path.join(
+                consts.S3_BASE_URL, thumbnail_file_key)
+            asset_data = {'file_path': file_path,
+                          "thumbnail_file_path": thumbnail_file_path}
+            return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+@app.route("/upload_template_asset", methods=['POST'])
+@token_required
+def handle_upload_template_asset(user_uid):
+    try:
+        if user_uid:
+            image_file = request.files['image']
+            file_name = image_file.filename
+            file_type = file_name.split(".")[-1]
+            image_bytes = request.files['image'].read()
+            image_size_bytes = len(image_bytes)
+            if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                raise errs.MaxFileSizeExceeded()
+            tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+            tmp_fpath = os.path.join('\tmp', tmp_fname)
+            thumbnail_fpath = os.path.join(
+                '\tmp', "thumbnail_"+tmp_fname)
+            tab = request.form['tab']
+            collection = request.form['collection']
+            tags = request.form['tags']
+            if (tab == ''):
+                tab = 'NULL'
+            if (collection == ''):
+                collection = 'NULL'
+            if (tags == ''):
+                tags = 'NULL'
+            with open(tmp_fpath, 'wb') as f:
+                f.write(image_bytes)
+            file_key = upload_asset(tmp_fpath, tmp_fname)
+            generate_thumbnail(tmp_fpath, thumbnail_fpath)
+            thumbnail_file_key = upload_asset(
+                thumbnail_fpath, "thumbnail_"+tmp_fname)
+            os.remove(tmp_fpath)
+            os.remove(thumbnail_fpath)
+
+            _result = tables.Assets.insert(file_path=file_key,
+                                           thumbnail_file_path=thumbnail_file_key,
+                                           file_type=file_type,
+                                           file_name=file_name,
+                                           file_size_bytes=image_size_bytes,
+                                           creation_timestamp=int(time.time()),
+                                           user_uid=consts.ADMIN_USER_UID,
+                                           tab=tab,
+                                           collection=collection,
+                                           tags=tags)
+            file_path = os.path.join(consts.S3_BASE_URL, file_key)
+            thumbnail_file_path = os.path.join(
+                consts.S3_BASE_URL, thumbnail_file_key)
+            asset_data = {'file_path': file_path,
+                          "thumbnail_file_path": thumbnail_file_path}
             return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -271,7 +344,8 @@ def handle_overwrite_multi_asset(user_uid):
             logging.info(f"got asset_uid: {asset_uid}, file_key: {file_key}")
 
             # lookup thumbnail file key
-            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[
+                0]
 
             # extract image data
             image_file = request.files['image']
@@ -300,7 +374,8 @@ def handle_overwrite_multi_asset(user_uid):
             # generate thumbnail
             try:
                 generate_thumbnail(tmp_fpath, thumbnail_fpath)
-                _ = upload_asset(thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
+                _ = upload_asset(
+                    thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
             except Exception as e:
                 logging.error(f"exception on thumbnail: {e}")
                 logging.info(traceback.format_exc())
@@ -358,7 +433,8 @@ def handle_overwrite_multi_asset(user_uid):
             logging.info(f"got 4")
             # TODO maybe error
             try:
-                thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
+                thumbnail_file_path = os.path.join(
+                    consts.S3_BASE_URL, source_asset.thumbnail_file_path)
                 logging.info(f"got 5")
             except:
                 logging.info("got no thumbnail file path")
@@ -367,7 +443,8 @@ def handle_overwrite_multi_asset(user_uid):
             meta_file_path = os.path.join(consts.S3_BASE_URL, meta_file_key)
             logging.info(f"got 6")
 
-            asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path, "meta_file_path":meta_file_path}
+            asset_data = {'file_path': file_path,
+                          "thumbnail_file_path": thumbnail_file_path, "meta_file_path": meta_file_path}
 
             return format_response(True, ResponseCodes.OVERWRITE_SUCCESS.value, data=asset_data)
         else:
@@ -381,11 +458,6 @@ def handle_overwrite_multi_asset(user_uid):
         else:
             response_code = str(e)
         return format_response(False, response_code)
-
-
-
-
-
 
 
 #######################################################################################################################
@@ -402,7 +474,8 @@ def handle_overwrite_asset(user_uid):
             file_key = request.form['file_key']
 
             # lookup thumbnail file key
-            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[
+                0]
 
             # extract image data
             image_file = request.files['image']
@@ -425,7 +498,8 @@ def handle_overwrite_asset(user_uid):
 
             # upload to s3 and cleanup
             _ = upload_asset(tmp_fpath, file_key, overwrite=True)
-            _ = upload_asset(thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
+            _ = upload_asset(
+                thumbnail_fpath, source_asset.thumbnail_file_path, overwrite=True)
             os.remove(tmp_fpath)
 
             # update asset metadata
@@ -439,8 +513,10 @@ def handle_overwrite_asset(user_uid):
                                            user_uid=user_uid)
             assert _result == 1, "No asset was updated in database."
             file_path = os.path.join(consts.S3_BASE_URL, file_key)
-            thumbnail_file_path = os.path.join(consts.S3_BASE_URL, source_asset.thumbnail_file_path)
-            asset_data = {'file_path': file_path, "thumbnail_file_path": thumbnail_file_path}
+            thumbnail_file_path = os.path.join(
+                consts.S3_BASE_URL, source_asset.thumbnail_file_path)
+            asset_data = {'file_path': file_path,
+                          "thumbnail_file_path": thumbnail_file_path}
             return format_response(True, ResponseCodes.OVERWRITE_SUCCESS.value, data=asset_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -463,10 +539,12 @@ def handle_duplicate_asset(user_uid):
             asset_uid = request.json['asset_uid']
             print(f"P: duplicatin assing uid: {asset_uid}")
             logging.info(f"L: duplicatin assing uid: {asset_uid}")
-            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[
+                0]
             print(f"P: got source aset: {source_asset.file_path}")
             logging.info(f"L: got source aset: {source_asset.file_path}")
-            new_file_key = duplicate_asset(source_asset.file_path, source_asset.file_name)
+            new_file_key = duplicate_asset(
+                source_asset.file_path, source_asset.file_name)
             logging.info(f"inserting duplicated file")
             print(f"inserting duplicated file")
             _result = tables.Assets.insert(file_path=new_file_key,
@@ -538,10 +616,13 @@ def handle_duplicate_multi_asset(user_uid):
         if user_uid:
             asset_uid = request.json['asset_uid']
 
-            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[0]
+            source_asset: tables.Assets = tables.Assets.select(uid=asset_uid)[
+                0]
 
-            new_file_key = duplicate_asset(source_asset.file_path, source_asset.file_name)
-            meta_file_key = duplicate_asset(source_asset.meta_file_path, f"meta_{source_asset.file_name}")
+            new_file_key = duplicate_asset(
+                source_asset.file_path, source_asset.file_name)
+            meta_file_key = duplicate_asset(
+                source_asset.meta_file_path, f"meta_{source_asset.file_name}")
 
             _result = tables.Assets.insert(file_path=new_file_key,
                                            file_type=source_asset.file_type,
@@ -568,7 +649,6 @@ def handle_duplicate_multi_asset(user_uid):
         return format_response(False, response_code)
 
 
-
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -583,6 +663,42 @@ def handle_delete_asset(user_uid):
             assert num_rows == 1, f"{num_rows} deleted."
             delete_asset(file_key)
             return format_response(True, ResponseCodes.DELETE_ASSET_SUCCESS.value)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+@app.route("/get_categories", methods=['POST'])
+@token_required
+def get_categories(user_uid):
+    try:
+        if user_uid:
+            assets = tables.Assets.select(user_uid=consts.ADMIN_USER_UID)
+            asset_dicts = [x.to_dict() for x in assets]
+            res_data = {
+                'tab': [],
+                'collection': [],
+                'tags': []
+            }
+            for data in asset_dicts:
+                if (data['tab'] != None):
+                    res_data['tab'].append(data['tab'])
+                if (data['collection'] != None):
+                    res_data['collection'].append(data['collection'])
+                if (data['tags'] != None):
+                    res_data['tags'].append(data['tags'])
+            res_data = {
+                'tab': list(set(res_data['tab'])),
+                'collection': list(set(res_data['collection'])),
+                'tags': list(set(res_data['tags']))
+            }
+            return format_response(True, ResponseCodes.LIST_SUCCESS.value, data=res_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
     except Exception as e:
@@ -619,6 +735,57 @@ def list_template_assets(user_uid):
     try:
         if user_uid:
             assets = tables.Assets.select(user_uid=consts.ADMIN_USER_UID)
+            asset_dicts = [x.to_dict() for x in assets]
+            return format_response(True, ResponseCodes.LIST_TEMPLATES_SUCCESS.value, data=asset_dicts)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+@app.route("/list_template_assets_by_category", methods=['POST'])
+@token_required
+def list_template_assets_by_category(user_uid):
+    try:
+        if user_uid:
+            tab = request.form['tab']
+            collection = request.form['collection']
+            tags = request.form['tags']
+            if (tab == ''):
+                if (collection == ''):
+                    if (tags == ''):
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID)
+                    else:
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, tags=tags)
+                else:
+                    if (tags == ''):
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, collection=collection)
+                    else:
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, collection=collection, tags=tags)
+            else:
+                if (collection == ''):
+                    if (tags == ''):
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, tab=tab)
+                    else:
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, tab=tab, tags=tags)
+                else:
+                    if (tags == ''):
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, tab=tab, collection=collection)
+                    else:
+                        assets = tables.Assets.select(
+                            user_uid=consts.ADMIN_USER_UID, tab=tab, collection=collection, tags=tags)
             asset_dicts = [x.to_dict() for x in assets]
             return format_response(True, ResponseCodes.LIST_TEMPLATES_SUCCESS.value, data=asset_dicts)
         else:
@@ -691,7 +858,3 @@ def resource_not_found(e):
 if __name__ == "__main__":
     # app.run(threaded=True, host="0.0.0.0", port=8081)
     app.run(threaded=True, host="0.0.0.0", port=80)
-
-
-
-
