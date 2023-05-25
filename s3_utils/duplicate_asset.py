@@ -17,7 +17,7 @@ def duplicate_asset(source_file_key, filename):
     aws_access_key_id = os.environ.get("s3_aws_access_key_id")
     aws_secret_access_key = os.environ.get("s3_aws_secret_access_key")
     s3_resource = boto3.resource("s3",
-                                 region_name="us-west-1",
+                                 region_name="us-east-2",
                                  aws_access_key_id=aws_access_key_id,
                                  aws_secret_access_key=aws_secret_access_key)
     bucket = s3_resource.Bucket(bucket_name)

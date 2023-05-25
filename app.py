@@ -272,50 +272,49 @@ def handle_upload_asset(user_uid):
 def handle_upload_template_asset(user_uid):
     try:
         if user_uid:
-            image_file = request.files['image']
-            file_name = image_file.filename
-            file_type = file_name.split(".")[-1]
-            image_bytes = request.files['image'].read()
-            image_size_bytes = len(image_bytes)
-            if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
-                raise errs.MaxFileSizeExceeded()
-            tmp_fname = f"tmp_{int(time.time())}_{file_name}"
-            tmp_fpath = os.path.join('\tmp', tmp_fname)
-            thumbnail_fpath = os.path.join(
-                '\tmp', "thumbnail_"+tmp_fname)
-            tab = request.form['tab']
-            collection = request.form['collection']
-            tags = request.form['tags']
-            if (tab == ''):
-                tab = 'NULL'
-            if (collection == ''):
-                collection = 'NULL'
-            if (tags == ''):
-                tags = 'NULL'
-            with open(tmp_fpath, 'wb') as f:
-                f.write(image_bytes)
-            file_key = upload_asset(tmp_fpath, tmp_fname)
-            generate_thumbnail(tmp_fpath, thumbnail_fpath)
-            thumbnail_file_key = upload_asset(
-                thumbnail_fpath, "thumbnail_"+tmp_fname)
-            os.remove(tmp_fpath)
-            os.remove(thumbnail_fpath)
-
-            _result = tables.Assets.insert(file_path=file_key,
-                                           thumbnail_file_path=thumbnail_file_key,
-                                           file_type=file_type,
-                                           file_name=file_name,
-                                           file_size_bytes=image_size_bytes,
-                                           creation_timestamp=int(time.time()),
-                                           user_uid=consts.ADMIN_USER_UID,
-                                           tab=tab,
-                                           collection=collection,
-                                           tags=tags)
-            file_path = os.path.join(consts.S3_BASE_URL, file_key)
-            thumbnail_file_path = os.path.join(
-                consts.S3_BASE_URL, thumbnail_file_key)
+            uploaded_files = request.files.getlist('image')
+            file_path = ''
+            thumbnail_file_path = ''
+            for file in uploaded_files:
+                image_file = file
+                file_name = image_file.filename
+                file_type = file_name.split(".")[-1]
+                image_bytes = file.read()
+                image_size_bytes = len(image_bytes)
+                if image_size_bytes > consts.MAX_FILE_SIZE_BYTES:
+                    raise errs.MaxFileSizeExceeded()
+                tmp_fname = f"tmp_{int(time.time())}_{file_name}"
+                tmp_fpath = os.path.join('/tmp', tmp_fname)
+                thumbnail_fpath = os.path.join('/tmp', "thumbnail_"+tmp_fname)
+                with open(tmp_fpath, 'wb') as f:
+                    f.write(image_bytes)
+                file_key = upload_asset(tmp_fpath, tmp_fname)
+                generate_thumbnail(tmp_fpath, thumbnail_fpath)
+                thumbnail_file_key = upload_asset(
+                    thumbnail_fpath, "thumbnail_"+tmp_fname)
+                os.remove(tmp_fpath)
+                os.remove(thumbnail_fpath)
+                tab = request.form['tab']
+                collection = request.form['collection']
+                tags = request.form['tags']
+                if (tab == ''):
+                    tab = 'NULL'
+                if (collection == ''):
+                    collection = 'NULL'
+                if (tags == ''):
+                    tags = 'NULL'
+                _result = tables.Assets.insert(file_path=file_key,
+                                            thumbnail_file_path=thumbnail_file_key,
+                                            file_type=file_type,
+                                            file_name=file_name,
+                                            file_size_bytes=image_size_bytes,
+                                            creation_timestamp=int(time.time()),
+                                            user_uid=consts.ADMIN_USER_UID,
+                                            tab=tab,
+                                            collection=collection,
+                                            tags=tags)
             asset_data = {'file_path': file_path,
-                          "thumbnail_file_path": thumbnail_file_path}
+                "thumbnail_file_path": thumbnail_file_path}
             return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
         else:
             return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
@@ -326,6 +325,7 @@ def handle_upload_template_asset(user_uid):
         else:
             response_code = str(e)
         return format_response(False, response_code)
+
 
 
 #######################################################################################################################
@@ -621,8 +621,8 @@ def handle_duplicate_multi_asset(user_uid):
 
             new_file_key = duplicate_asset(
                 source_asset.file_path, source_asset.file_name)
-            meta_file_key = duplicate_asset(
-                source_asset.meta_file_path, f"meta_{source_asset.file_name}")
+            # meta_file_key = duplicate_asset(
+            #     source_asset.meta_file_path, f"meta_{source_asset.file_name}")
 
             _result = tables.Assets.insert(file_path=new_file_key,
                                            file_type=source_asset.file_type,
@@ -630,7 +630,7 @@ def handle_duplicate_multi_asset(user_uid):
                                            file_size_bytes=source_asset.file_size_bytes,
                                            creation_timestamp=int(time.time()),
                                            thumbnail_file_path=source_asset.thumbnail_file_path,
-                                           meta_file_path=meta_file_key,
+                                           # meta_file_path=meta_file_key,
                                            user_uid=user_uid)
 
             logging.info(f"inserted duplicated file: {new_file_key}")
@@ -709,6 +709,44 @@ def get_categories(user_uid):
             response_code = str(e)
         return format_response(False, response_code)
 
+@app.route("/list_tags", methods=['POST'])
+@token_required
+def list_tags(user_uid):
+    try:
+        if user_uid:
+            tags = tables.Tags.select()
+            tag_dicts = [x.to_dict() for x in tags]
+            return format_response(True, ResponseCodes.LIST_SUCCESS.value, data=tag_dicts)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+@app.route("/insert_tag", methods=['POST'])
+@token_required
+def insert_tag(user_uid):
+    try:
+        if user_uid:
+            tid = request.form['id']
+            ttag = request.form['tag']
+            
+            tables.Tags.insert(id=tid, tag=ttag)
+
+            return format_response(True, ResponseCodes.DUPLICATE_SUCCESS.value, data="success")
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
 
 @app.route("/list_assets", methods=['POST'])
 @token_required
