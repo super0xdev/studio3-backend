@@ -31,3 +31,4 @@ class Assets(Table):
     tab: str
     tags: str
     collection: str
+    owner: str
