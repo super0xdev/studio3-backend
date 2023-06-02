@@ -275,6 +275,7 @@ def handle_upload_template_asset(user_uid):
             uploaded_files = request.files.getlist('image')
             file_path = ''
             thumbnail_file_path = ''
+            address = request.form['address']
             for file in uploaded_files:
                 image_file = file
                 file_name = image_file.filename
@@ -312,7 +313,9 @@ def handle_upload_template_asset(user_uid):
                                             user_uid=consts.ADMIN_USER_UID,
                                             tab=tab,
                                             collection=collection,
-                                            tags=tags)
+                                            tags=tags,
+                                            owner=address
+                                            )
             asset_data = {'file_path': file_path,
                 "thumbnail_file_path": thumbnail_file_path}
             return format_response(True, ResponseCodes.UPLOAD_SUCCESS.value, data=asset_data)
@@ -659,8 +662,10 @@ def handle_delete_asset(user_uid):
         if user_uid:
             asset_uid = request.json['asset_uid']
             file_key = request.json['file_key']
-            num_rows = tables.Assets.delete(uid=asset_uid, user_uid=user_uid)
-            assert num_rows == 1, f"{num_rows} deleted."
+            file_name = request.json['file_name']
+            items = tables.Assets.select(file_name=file_name)
+            for item in items:
+                tables.Assets.delete(uid=item.uid)
             delete_asset(file_key)
             return format_response(True, ResponseCodes.DELETE_ASSET_SUCCESS.value)
         else:
