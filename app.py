@@ -666,6 +666,27 @@ def handle_delete_asset(user_uid):
             items = tables.Assets.select(file_name=file_name)
             for item in items:
                 tables.Assets.delete(uid=item.uid)
+                delete_asset(item.file_path)
+            return format_response(True, ResponseCodes.DELETE_ASSET_SUCCESS.value)
+        else:
+            return format_response(False, ResponseCodes.NOT_LOGGED_IN.value)
+    except Exception as e:
+        print(traceback.format_exc())
+        if hasattr(e, "code"):
+            response_code = e.code
+        else:
+            response_code = str(e)
+        return format_response(False, response_code)
+
+
+@app.route("/delete_user_asset", methods=['POST'])
+@token_required
+def handle_delete_user_asset(user_uid):
+    try:
+        if user_uid:
+            asset_uid = request.json['asset_uid']
+            file_key = request.json['file_key']
+            tables.Assets.delete(uid = asset_uid)
             delete_asset(file_key)
             return format_response(True, ResponseCodes.DELETE_ASSET_SUCCESS.value)
         else:
