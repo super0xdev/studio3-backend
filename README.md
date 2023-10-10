@@ -68,3 +68,6 @@ body except for the /upload_asset endpoint which takes a FormData() object.
 - Client code examples can be found in the `tests` folder.
 - This system is currently deployed as AWS Lambda functions using the Serverless Framework 
 
+-Product live url
+ studio3-vercel.com
+ The test version is running on this link. Please check it out.
